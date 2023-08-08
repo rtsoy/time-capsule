@@ -7,7 +7,7 @@ import (
 )
 
 type Capsule struct {
-	ID        primitive.ObjectID
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
 	UserID    primitive.ObjectID
 	Message   string
 	Images    []string
