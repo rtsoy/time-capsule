@@ -7,7 +7,6 @@ import (
 )
 
 type CreateCapsuleDTO struct {
-	UserID  primitive.ObjectID
 	Message string
 	Images  []string
 	OpenAt  time.Time
