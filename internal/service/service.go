@@ -16,7 +16,7 @@ type Service struct {
 
 func NewService(repository *repository.Repository) *Service {
 	return &Service{
-		UserService:    nil,
+		UserService:    NewUserService(repository.UserRepository),
 		CapsuleService: NewCapsuleService(repository.CapsuleRepository),
 	}
 }
@@ -24,6 +24,7 @@ func NewService(repository *repository.Repository) *Service {
 type UserService interface {
 	CreateUser(ctx context.Context, input domain.CreateUserDTO) (*domain.User, error)
 	GenerateToken(ctx context.Context, email, password string) (string, error)
+	ParseToken(accessToken string) (*jwtClaims, error)
 }
 
 type CapsuleService interface {
