@@ -22,6 +22,8 @@ func NewService(repository *repository.Repository) *Service {
 }
 
 type UserService interface {
+	CreateUser(ctx context.Context, input domain.CreateUserDTO) (*domain.User, error)
+	GenerateToken(ctx context.Context, email, password string) (string, error)
 }
 
 type CapsuleService interface {
