@@ -16,6 +16,12 @@ type Config struct {
 	SMTPPort     string `env:"SMTP_PORT"`
 	SMTPUsername string `env:"SMTP_USERNAME"`
 	SMTPPassword string `env:"SMTP_PASSWORD"`
+
+	MinioHost       string `env:"MINIO_HOST"`
+	MinioPort       string `env:"MINIO_PORT"`
+	MinioAccessKey  string `env:"ACCESS_KEY"`
+	MinioSecretKey  string `env:"SECRET_KEY"`
+	MinioBucketName string `env:"BUCKET_NAME"`
 }
 
 func New() (*Config, error) {
