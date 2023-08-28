@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"time-capsule/internal/domain"
@@ -26,6 +27,8 @@ var (
 	ErrPasswordHashFailure = errors.New("failed to hash a password")
 	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrInvalidToken        = errors.New("invalid token")
+	ErrEmailDuplicate      = errors.New("email already in use")
+	ErrUsernameDuplicate   = errors.New("username already in use")
 )
 
 type jwtClaims struct {
@@ -44,7 +47,7 @@ func NewUserService(repository repository.UserRepository) UserService {
 	}
 }
 
-// Todo: Validation (username, email uniqueness, length etc)
+// Todo: Validation length ???
 
 func (s *userService) CreateUser(ctx context.Context, input domain.CreateUserDTO) (*domain.User, error) {
 	toInsert := &domain.User{
@@ -62,6 +65,14 @@ func (s *userService) CreateUser(ctx context.Context, input domain.CreateUserDTO
 
 	res, err := s.repository.InsertUser(ctx, toInsert)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			if strings.Contains(err.Error(), "email") {
+				return nil, ErrEmailDuplicate
+			} else if strings.Contains(err.Error(), "username") {
+				return nil, ErrUsernameDuplicate
+			}
+		}
+
 		log.Println("CreateUser", err)
 		return nil, ErrDBFailure
 	}
