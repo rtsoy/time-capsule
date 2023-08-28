@@ -14,6 +14,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var (
+	ErrDBFailure   = errors.New("something went wrong... try again later :(")
+	ErrNotFound    = errors.New("not found")
+	ErrInvalidTime = errors.New("opening time cannot be before than now")
+)
+
 type capsuleService struct {
 	repository repository.CapsuleRepository
 }
@@ -41,15 +47,21 @@ func (s *capsuleService) CreateCapsule(ctx context.Context, userID primitive.Obj
 
 	res, err := s.repository.InsertCapsule(ctx, toInsert)
 	if err != nil {
-		log.Printf("failed to insert a capsule: %s\n", err)
-		return nil, errors.New("failed to create a capsule")
+		log.Println("CreateCapsule", err)
+		return nil, ErrDBFailure
 	}
 
 	return res, nil
 }
 
 func (s *capsuleService) GetAllCapsules(ctx context.Context, userID primitive.ObjectID) ([]*domain.Capsule, error) {
-	return s.repository.GetCapsules(ctx, bson.M{"userID": userID})
+	capsules, err := s.repository.GetCapsules(ctx, bson.M{"userID": userID})
+	if err != nil {
+		log.Println("GetAllCapsules", err)
+		return nil, ErrDBFailure
+	}
+
+	return capsules, nil
 }
 
 func (s *capsuleService) GetCapsuleByID(ctx context.Context, id primitive.ObjectID) (*domain.Capsule, error) {
@@ -57,11 +69,11 @@ func (s *capsuleService) GetCapsuleByID(ctx context.Context, id primitive.Object
 
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, nil
+			return nil, ErrNotFound
 		}
 
-		log.Printf("failed to retrieve a capsule: %s", err)
-		return nil, errors.New("failed to retrieve a capsule")
+		log.Println("GetCapsuleByID", err)
+		return nil, ErrDBFailure
 	}
 
 	return capsule, nil
@@ -80,20 +92,25 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, id primitive.ObjectI
 
 	if !update.OpenAt.IsZero() {
 		if update.OpenAt.Before(time.Now().UTC()) || update.OpenAt.Equal(time.Now().UTC()) {
-			return errors.New("opening time cannot be before than now")
+			return ErrInvalidTime
 		}
 
 		updateArgs["openAt"] = update.OpenAt
 	}
 
 	if err := s.repository.UpdateCapsule(ctx, id, bson.M{"$set": updateArgs}); err != nil {
-		log.Printf("failed to update a capsule: %s", err)
-		return errors.New("failed to update a capsule")
+		log.Println("UpdateCapsule", err)
+		return ErrDBFailure
 	}
 
 	return nil
 }
 
 func (s *capsuleService) DeleteCapsule(ctx context.Context, id primitive.ObjectID) error {
-	return s.repository.DeleteCapsule(ctx, id)
+	if err := s.repository.DeleteCapsule(ctx, id); err != nil {
+		log.Println("DeleteCapsule", err)
+		return ErrDBFailure
+	}
+
+	return nil
 }
