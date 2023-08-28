@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const usersCollection = "users"
@@ -17,6 +18,20 @@ type MongoUserRepository struct {
 }
 
 func NewMongoUserRepository(db *mongo.Database) UserRepository {
+	db.Collection(usersCollection).Indexes().CreateMany(
+		context.Background(),
+		[]mongo.IndexModel{
+			{
+				Keys:    bson.M{"username": 1},
+				Options: options.Index().SetUnique(true),
+			},
+			{
+				Keys:    bson.M{"email": 1},
+				Options: options.Index().SetUnique(true),
+			},
+		},
+	)
+
 	return &MongoUserRepository{
 		collection: db.Collection(usersCollection),
 	}
