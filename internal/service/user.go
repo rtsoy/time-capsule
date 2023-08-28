@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -21,6 +20,12 @@ import (
 const (
 	bcryptCost = 10
 	tokenTTL   = 24 * time.Hour * 7
+)
+
+var (
+	ErrPasswordHashFailure = errors.New("failed to hash a password")
+	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrInvalidToken        = errors.New("invalid token")
 )
 
 type jwtClaims struct {
@@ -50,15 +55,15 @@ func (s *userService) CreateUser(ctx context.Context, input domain.CreateUserDTO
 
 	hash, err := hashPassword(input.Password)
 	if err != nil {
-		log.Printf("failed to hash a password: %s\n", err)
-		return nil, errors.New("failed to hash a password")
+		log.Println("hashPassword", err)
+		return nil, ErrPasswordHashFailure
 	}
 	toInsert.PasswordHash = hash
 
 	res, err := s.repository.InsertUser(ctx, toInsert)
 	if err != nil {
-		log.Printf("failed to insert a user: %s\n", err)
-		return nil, errors.New("failed to insert a user")
+		log.Println("CreateUser", err)
+		return nil, ErrDBFailure
 	}
 
 	return res, nil
@@ -68,15 +73,15 @@ func (s *userService) GenerateToken(ctx context.Context, email, password string)
 	user, err := s.repository.GetUser(ctx, bson.M{"email": email})
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return "", errors.New("invalid credentials")
+			return "", ErrInvalidCredentials
 		}
 
-		log.Printf("failed to find a user in db: %s\n", err)
-		return "", errors.New("failed to find a user in db")
+		log.Println("GetUser", err)
+		return "", ErrDBFailure
 	}
 
 	if !comparePasswords(password, user.PasswordHash) {
-		return "", errors.New("invalid credentials")
+		return "", ErrInvalidCredentials
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims{
@@ -92,21 +97,21 @@ func (s *userService) GenerateToken(ctx context.Context, email, password string)
 func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, ErrInvalidToken
 		}
 
 		secret := os.Getenv("JWT_SECRET")
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidToken
 	}
 
 	if claims, ok := token.Claims.(*jwtClaims); ok && token.Valid {
 		return claims, nil
 	}
 
-	return nil, errors.New("invalid token")
+	return nil, ErrInvalidToken
 }
 
 func comparePasswords(pw, hash string) bool {

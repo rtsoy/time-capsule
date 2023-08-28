@@ -15,8 +15,6 @@ import (
 )
 
 var (
-	ErrDBFailure   = errors.New("something went wrong... try again later :(")
-	ErrNotFound    = errors.New("not found")
 	ErrInvalidTime = errors.New("opening time cannot be before than now")
 )
 

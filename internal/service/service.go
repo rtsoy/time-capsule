@@ -2,11 +2,17 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"time-capsule/internal/domain"
 	"time-capsule/internal/repository"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+var (
+	ErrDBFailure = errors.New("something went wrong... try again later :(")
+	ErrNotFound  = errors.New("not found")
 )
 
 type Service struct {
