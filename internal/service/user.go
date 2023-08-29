@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -19,8 +20,10 @@ import (
 )
 
 const (
-	bcryptCost = 10
-	tokenTTL   = 24 * time.Hour * 7
+	bcryptCost    = 10
+	tokenTTL      = 24 * time.Hour * 7
+	usernameRegex = `^[A-Za-z0-9]{3,30}$`
+	emailRegex    = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 )
 
 var (
@@ -29,6 +32,8 @@ var (
 	ErrInvalidToken        = errors.New("invalid token")
 	ErrEmailDuplicate      = errors.New("email already in use")
 	ErrUsernameDuplicate   = errors.New("username already in use")
+	ErrInvalidEmail        = errors.New("use a valid email address")
+	ErrInvalidUsername     = errors.New("username must be between 3 and 30 characters long and can only contain english alphabet letters (both lowercase and uppercase) and digits")
 )
 
 type jwtClaims struct {
@@ -47,9 +52,15 @@ func NewUserService(repository repository.UserRepository) UserService {
 	}
 }
 
-// Todo: Validation length ???
-
 func (s *userService) CreateUser(ctx context.Context, input domain.CreateUserDTO) (*domain.User, error) {
+	if !usernameValidation(input.Username) {
+		return nil, ErrInvalidUsername
+	}
+
+	if !emailValidation(input.Email) {
+		return nil, ErrInvalidEmail
+	}
+
 	toInsert := &domain.User{
 		Username:     input.Username,
 		Email:        input.Email,
@@ -123,6 +134,16 @@ func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
 	}
 
 	return nil, ErrInvalidToken
+}
+
+func emailValidation(email string) bool {
+	res, _ := regexp.Match(emailRegex, []byte(email))
+	return res
+}
+
+func usernameValidation(username string) bool {
+	res, _ := regexp.Match(usernameRegex, []byte(username))
+	return res
 }
 
 func comparePasswords(pw, hash string) bool {
