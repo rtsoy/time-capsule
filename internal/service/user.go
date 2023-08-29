@@ -119,7 +119,7 @@ func (s *userService) GenerateToken(ctx context.Context, email, password string)
 
 	secret := os.Getenv("JWT_SECRET")
 
-	return token.SignedString(secret)
+	return token.SignedString([]byte(secret))
 }
 
 func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
@@ -172,7 +172,7 @@ func usernameValidation(username string) bool {
 }
 
 func comparePasswords(pw, hash string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(pw), []byte(hash)) == nil
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(pw)) == nil
 }
 
 func hashPassword(pw string) (string, error) {
