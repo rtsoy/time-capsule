@@ -25,7 +25,6 @@ const (
 
 	usernameRegex = `^[A-Za-z0-9]{3,30}$`
 	emailRegex    = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	passwordRegex = `^(?=.*[A-Z])(?=.*\d).{8,}$`
 )
 
 var (
@@ -144,8 +143,22 @@ func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
 }
 
 func passwordValidation(pw string) bool {
-	res, _ := regexp.Match(passwordRegex, []byte(pw))
-	return res
+	if len(pw) < 8 {
+		return false
+	}
+
+	hasUppercase := false
+	hasDigit := false
+
+	for _, char := range pw {
+		if strings.ContainsRune("ABCDEFGHIJKLMNOPQRSTUVWXYZ", char) {
+			hasUppercase = true
+		} else if strings.ContainsRune("0123456789", char) {
+			hasDigit = true
+		}
+	}
+
+	return hasUppercase && hasDigit
 }
 
 func emailValidation(email string) bool {
