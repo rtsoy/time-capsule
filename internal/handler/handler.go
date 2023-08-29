@@ -15,6 +15,7 @@ const (
 	signInURL = apiPrefix + "/sign-in"
 
 	createCapsuleURL = apiPrefix + "/capsules"
+	getCapsulesURL
 )
 
 type Handler interface {
@@ -45,4 +46,5 @@ func (h *handler) InitRoutes() {
 	h.router.POST(signInURL, h.signIn)
 
 	h.router.POST(createCapsuleURL, h.JWTAuthentication(h.createCapsule))
+	h.router.GET(getCapsulesURL, h.JWTAuthentication(h.getCapsules))
 }

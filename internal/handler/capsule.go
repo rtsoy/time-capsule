@@ -9,6 +9,23 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func (h *handler) getCapsules(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	userID, err := getUserID(r)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	capsules, err := h.svc.GetAllCapsules(r.Context(), userID)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	newJSONResponse(w, capsules)
+	return
+}
+
 func (h *handler) createCapsule(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	userID, err := getUserID(r)
 	if err != nil {
@@ -28,6 +45,6 @@ func (h *handler) createCapsule(w http.ResponseWriter, r *http.Request, _ httpro
 		return
 	}
 
-	newJSONResponse(w, capsule)
+	newJSONResponse(w, capsule, http.StatusCreated)
 	return
 }
