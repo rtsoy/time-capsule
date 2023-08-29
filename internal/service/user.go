@@ -20,10 +20,12 @@ import (
 )
 
 const (
-	bcryptCost    = 10
-	tokenTTL      = 24 * time.Hour * 7
+	bcryptCost = 10
+	tokenTTL   = 24 * time.Hour * 7
+
 	usernameRegex = `^[A-Za-z0-9]{3,30}$`
 	emailRegex    = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	passwordRegex = `^(?=.*[A-Z])(?=.*\d).{8,}$`
 )
 
 var (
@@ -34,6 +36,7 @@ var (
 	ErrUsernameDuplicate   = errors.New("username already in use")
 	ErrInvalidEmail        = errors.New("use a valid email address")
 	ErrInvalidUsername     = errors.New("username must be between 3 and 30 characters long and can only contain english alphabet letters (both lowercase and uppercase) and digits")
+	ErrInvalidPassword     = errors.New("password must be at least 8 characters long and include at least one uppercase letter and one digit")
 )
 
 type jwtClaims struct {
@@ -59,6 +62,10 @@ func (s *userService) CreateUser(ctx context.Context, input domain.CreateUserDTO
 
 	if !emailValidation(input.Email) {
 		return nil, ErrInvalidEmail
+	}
+
+	if !passwordValidation(input.Password) {
+		return nil, ErrInvalidPassword
 	}
 
 	toInsert := &domain.User{
@@ -134,6 +141,11 @@ func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
 	}
 
 	return nil, ErrInvalidToken
+}
+
+func passwordValidation(pw string) bool {
+	res, _ := regexp.Match(passwordRegex, []byte(pw))
+	return res
 }
 
 func emailValidation(email string) bool {
