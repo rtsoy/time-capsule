@@ -40,4 +40,5 @@ type CapsuleService interface {
 	GetCapsuleByID(ctx context.Context, id primitive.ObjectID) (*domain.Capsule, error)
 	UpdateCapsule(ctx context.Context, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error
 	DeleteCapsule(ctx context.Context, id primitive.ObjectID) error
+	AddImage(ctx context.Context, id primitive.ObjectID, image string) error
 }

@@ -113,3 +113,11 @@ func (s *capsuleService) DeleteCapsule(ctx context.Context, id primitive.ObjectI
 
 	return nil
 }
+
+func (s *capsuleService) AddImage(ctx context.Context, id primitive.ObjectID, image string) error {
+	return s.repository.UpdateCapsule(ctx, id, bson.M{
+		"$push": bson.M{
+			"images": image,
+		},
+	})
+}
