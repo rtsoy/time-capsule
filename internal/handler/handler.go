@@ -13,6 +13,8 @@ const (
 
 	signUpURL = apiPrefix + "/sign-up"
 	signInURL = apiPrefix + "/sign-in"
+
+	createCapsuleURL = apiPrefix + "/capsules"
 )
 
 type Handler interface {
@@ -41,4 +43,6 @@ func (h *handler) Router() http.Handler {
 func (h *handler) InitRoutes() {
 	h.router.POST(signUpURL, h.signUp)
 	h.router.POST(signInURL, h.signIn)
+
+	h.router.POST(createCapsuleURL, h.JWTAuthentication(h.createCapsule))
 }
