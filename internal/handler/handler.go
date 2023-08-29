@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"time-capsule/internal/service"
+	"time-capsule/internal/storage"
 
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,7 +21,15 @@ const (
 
 	createCapsuleURL = apiPrefix + "/capsules"
 	getCapsulesURL
-	getCapsuleByIDURL = getCapsulesURL + "/:" + pathCapsuleID
+	getCapsuleURL = getCapsulesURL + "/:" + pathCapsuleID
+	updateCapsule
+	deleteCapsule
+
+	pathImageID = "imageID"
+
+	addCapsuleImage = getCapsuleURL + "/images"
+	getCapsuleImage = getCapsuleURL + "/:" + pathImageID
+	removeCapsuleImage
 )
 
 type Handler interface {
@@ -29,16 +38,18 @@ type Handler interface {
 }
 
 type handler struct {
-	router *httprouter.Router
-	svc    *service.Service
+	router  *httprouter.Router
+	svc     *service.Service
+	storage storage.Storage
 }
 
-func NewHandler(svc *service.Service) Handler {
+func NewHandler(svc *service.Service, storage storage.Storage) Handler {
 	router := httprouter.New()
 
 	return &handler{
-		router: router,
-		svc:    svc,
+		router:  router,
+		svc:     svc,
+		storage: storage,
 	}
 }
 
@@ -52,7 +63,9 @@ func (h *handler) InitRoutes() {
 
 	h.router.POST(createCapsuleURL, h.JWTAuthentication(h.createCapsule))
 	h.router.GET(getCapsulesURL, h.JWTAuthentication(h.getCapsules))
-	h.router.GET(getCapsuleByIDURL, h.JWTAuthentication(h.getCapsuleByID))
+	h.router.GET(getCapsuleURL, h.JWTAuthentication(h.getCapsuleByID))
+
+	h.router.POST(addCapsuleImage, h.JWTAuthentication(h.addCapsuleImage))
 }
 
 func parseObjectIDFromParam(params httprouter.Params, name string) (primitive.ObjectID, error) {
