@@ -14,7 +14,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -36,13 +35,8 @@ var (
 	ErrInvalidEmail        = errors.New("use a valid email address")
 	ErrInvalidUsername     = errors.New("username must be between 3 and 30 characters long and can only contain english alphabet letters (both lowercase and uppercase) and digits")
 	ErrInvalidPassword     = errors.New("password must be at least 8 characters long and include at least one uppercase letter and one digit")
+	ErrTokenExpired        = errors.New("token expired")
 )
-
-type jwtClaims struct {
-	jwt.Claims
-	userID primitive.ObjectID
-	exp    time.Time
-}
 
 type userService struct {
 	repository repository.UserRepository
@@ -112,9 +106,9 @@ func (s *userService) GenerateToken(ctx context.Context, email, password string)
 		return "", ErrInvalidCredentials
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims{
-		exp:    time.Now().UTC().Add(tokenTTL),
-		userID: user.ID,
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": user.ID,
+		"exp":    time.Now().UTC().Add(tokenTTL).Unix(),
 	})
 
 	secret := os.Getenv("JWT_SECRET")
@@ -122,7 +116,7 @@ func (s *userService) GenerateToken(ctx context.Context, email, password string)
 	return token.SignedString([]byte(secret))
 }
 
-func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
+func (s *userService) ParseToken(accessToken string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrInvalidToken
@@ -132,10 +126,14 @@ func (s *userService) ParseToken(accessToken string) (*jwtClaims, error) {
 		return []byte(secret), nil
 	})
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, ErrTokenExpired
+		}
+
 		return nil, ErrInvalidToken
 	}
 
-	if claims, ok := token.Claims.(*jwtClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, nil
 	}
 

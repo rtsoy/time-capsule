@@ -21,6 +21,7 @@ var statusCodes = map[error]int{
 
 	service.ErrInvalidToken:       http.StatusUnauthorized, // 401
 	service.ErrInvalidCredentials: http.StatusUnauthorized,
+	service.ErrTokenExpired:       http.StatusUnauthorized,
 
 	service.ErrInvalidTime:     http.StatusBadRequest, // 400
 	service.ErrInvalidEmail:    http.StatusBadRequest,

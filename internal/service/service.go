@@ -7,6 +7,7 @@ import (
 	"time-capsule/internal/domain"
 	"time-capsule/internal/repository"
 
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -30,7 +31,7 @@ func NewService(repository *repository.Repository) *Service {
 type UserService interface {
 	CreateUser(ctx context.Context, input domain.CreateUserDTO) (*domain.User, error)
 	GenerateToken(ctx context.Context, email, password string) (string, error)
-	ParseToken(accessToken string) (*jwtClaims, error)
+	ParseToken(accessToken string) (jwt.MapClaims, error)
 }
 
 type CapsuleService interface {
