@@ -37,8 +37,8 @@ type UserService interface {
 type CapsuleService interface {
 	CreateCapsule(ctx context.Context, userID primitive.ObjectID, capsule domain.CreateCapsuleDTO) (*domain.Capsule, error)
 	GetAllCapsules(ctx context.Context, userID primitive.ObjectID) ([]*domain.Capsule, error)
-	GetCapsuleByID(ctx context.Context, id primitive.ObjectID) (*domain.Capsule, error)
-	UpdateCapsule(ctx context.Context, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error
-	DeleteCapsule(ctx context.Context, id primitive.ObjectID) error
-	AddImage(ctx context.Context, id primitive.ObjectID, image string) error
+	GetCapsuleByID(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) (*domain.Capsule, error)
+	UpdateCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error
+	DeleteCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error
+	AddImage(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, image string) error
 }

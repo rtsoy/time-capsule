@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"time-capsule/internal/domain"
@@ -23,14 +22,9 @@ func (h *handler) getCapsuleByID(w http.ResponseWriter, r *http.Request, params 
 		return
 	}
 
-	capsule, err := h.svc.GetCapsuleByID(r.Context(), capsuleID)
+	capsule, err := h.svc.GetCapsuleByID(r.Context(), userID, capsuleID)
 	if err != nil {
 		newErrorResponse(w, err)
-		return
-	}
-
-	if capsule.UserID != userID {
-		newErrorResponse(w, errors.New("forbidden"), http.StatusForbidden)
 		return
 	}
 

@@ -19,6 +19,8 @@ var statusCodes = map[error]int{
 
 	service.ErrNotFound: http.StatusNotFound, // 404
 
+	service.ErrForbidden: http.StatusForbidden,
+
 	service.ErrInvalidToken:       http.StatusUnauthorized, // 401
 	service.ErrInvalidCredentials: http.StatusUnauthorized,
 	service.ErrTokenExpired:       http.StatusUnauthorized,

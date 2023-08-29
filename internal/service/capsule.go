@@ -17,6 +17,7 @@ import (
 var (
 	ErrInvalidTime  = errors.New("opening time cannot be before than now")
 	ErrShortMessage = errors.New("message must be at least 5 characters long")
+	ErrForbidden    = errors.New("not allowed")
 )
 
 type capsuleService struct {
@@ -67,8 +68,12 @@ func (s *capsuleService) GetAllCapsules(ctx context.Context, userID primitive.Ob
 	return capsules, nil
 }
 
-func (s *capsuleService) GetCapsuleByID(ctx context.Context, id primitive.ObjectID) (*domain.Capsule, error) {
+func (s *capsuleService) GetCapsuleByID(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) (*domain.Capsule, error) {
 	capsule, err := s.repository.GetCapsule(ctx, bson.M{"_id": id})
+
+	if capsule.UserID != userID {
+		return nil, ErrForbidden
+	}
 
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -82,7 +87,11 @@ func (s *capsuleService) GetCapsuleByID(ctx context.Context, id primitive.Object
 	return capsule, nil
 }
 
-func (s *capsuleService) UpdateCapsule(ctx context.Context, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error {
+func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error {
+	if _, err := s.GetCapsuleByID(ctx, userID, id); err != nil {
+		return err
+	}
+
 	updateArgs := bson.M{}
 
 	if update.Message != "" {
@@ -105,7 +114,11 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, id primitive.ObjectI
 	return nil
 }
 
-func (s *capsuleService) DeleteCapsule(ctx context.Context, id primitive.ObjectID) error {
+func (s *capsuleService) DeleteCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error {
+	if _, err := s.GetCapsuleByID(ctx, userID, id); err != nil {
+		return err
+	}
+
 	if err := s.repository.DeleteCapsule(ctx, id); err != nil {
 		log.Println("DeleteCapsule", err)
 		return ErrDBFailure
@@ -114,7 +127,11 @@ func (s *capsuleService) DeleteCapsule(ctx context.Context, id primitive.ObjectI
 	return nil
 }
 
-func (s *capsuleService) AddImage(ctx context.Context, id primitive.ObjectID, image string) error {
+func (s *capsuleService) AddImage(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, image string) error {
+	if _, err := s.GetCapsuleByID(ctx, userID, id); err != nil {
+		return err
+	}
+
 	return s.repository.UpdateCapsule(ctx, id, bson.M{
 		"$push": bson.M{
 			"images": image,
