@@ -3,11 +3,15 @@ package handler
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+const userCtx = "userID"
 
 func (h *handler) JWTAuthentication(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -41,6 +45,22 @@ func (h *handler) JWTAuthentication(next httprouter.Handle) httprouter.Handle {
 			return
 		}
 
-		next(w, r.WithContext(context.WithValue(r.Context(), "userID", userID)), params)
+		next(w, r.WithContext(context.WithValue(r.Context(), userCtx, userID)), params)
 	}
+}
+
+func getUserID(r *http.Request) (primitive.ObjectID, error) {
+	id := r.Context().Value(userCtx).(string)
+	if id == "" {
+		log.Println("getUserID", "empty userId in context")
+		return primitive.NilObjectID, errors.New("internal server error")
+	}
+
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Println("getUserID", err)
+		return primitive.NilObjectID, errors.New("internal server error")
+	}
+
+	return oid, nil
 }
