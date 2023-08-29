@@ -7,15 +7,13 @@ import (
 )
 
 type CreateCapsuleDTO struct {
-	Message string
-	Images  []string
-	OpenAt  time.Time
+	Message string    `json:"message"`
+	OpenAt  time.Time `json:"openAt"`
 }
 
 type UpdateCapsuleDTO struct {
-	Message string
-	Images  []string
-	OpenAt  time.Time
+	Message string    `json:"message"`
+	OpenAt  time.Time `json:"openAt"`
 }
 
 type Capsule struct {

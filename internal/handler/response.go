@@ -27,6 +27,7 @@ var statusCodes = map[error]int{
 	service.ErrInvalidEmail:    http.StatusBadRequest,
 	service.ErrInvalidUsername: http.StatusBadRequest,
 	service.ErrInvalidPassword: http.StatusBadRequest,
+	service.ErrShortMessage:    http.StatusBadRequest,
 }
 
 type errorResponse struct {

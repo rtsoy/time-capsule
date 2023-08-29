@@ -15,7 +15,8 @@ import (
 )
 
 var (
-	ErrInvalidTime = errors.New("opening time cannot be before than now")
+	ErrInvalidTime  = errors.New("opening time cannot be before than now")
+	ErrShortMessage = errors.New("message must be at least 5 characters long")
 )
 
 type capsuleService struct {
@@ -30,17 +31,21 @@ func NewCapsuleService(repository repository.CapsuleRepository) CapsuleService {
 
 // Todo: min openTime 1 day ? update capsule only 30 min after creation ?
 
-func (s *capsuleService) CreateCapsule(ctx context.Context, userID primitive.ObjectID, capsule domain.CreateCapsuleDTO) (*domain.Capsule, error) {
-	toInsert := &domain.Capsule{
-		UserID:    userID,
-		Message:   capsule.Message,
-		Images:    capsule.Images,
-		OpenAt:    capsule.OpenAt.UTC(),
-		CreatedAt: time.Now().UTC(),
+func (s *capsuleService) CreateCapsule(ctx context.Context, userID primitive.ObjectID, input domain.CreateCapsuleDTO) (*domain.Capsule, error) {
+	if len(input.Message) < 5 {
+		return nil, ErrShortMessage
 	}
 
-	if toInsert.Images == nil {
-		toInsert.Images = []string{}
+	if input.OpenAt.UTC().Before(time.Now().UTC()) {
+		return nil, ErrInvalidTime
+	}
+
+	toInsert := &domain.Capsule{
+		UserID:    userID,
+		Message:   input.Message,
+		Images:    []string{},
+		OpenAt:    input.OpenAt.UTC(),
+		CreatedAt: time.Now().UTC(),
 	}
 
 	res, err := s.repository.InsertCapsule(ctx, toInsert)
@@ -82,10 +87,6 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, id primitive.ObjectI
 
 	if update.Message != "" {
 		updateArgs["message"] = update.Message
-	}
-
-	if len(update.Images) > 0 {
-		updateArgs["images"] = update.Images
 	}
 
 	if !update.OpenAt.IsZero() {
