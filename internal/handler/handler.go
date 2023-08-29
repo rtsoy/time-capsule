@@ -1,12 +1,18 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"time-capsule/internal/service"
 
 	"github.com/julienschmidt/httprouter"
+)
+
+const (
+	apiPrefix = "/api/v1"
+
+	signUpURL = apiPrefix + "/sign-up"
+	signInURL = apiPrefix + "/sign-in"
 )
 
 type Handler interface {
@@ -33,9 +39,6 @@ func (h *handler) Router() http.Handler {
 }
 
 func (h *handler) InitRoutes() {
-	h.router.GET("/", h.Index)
-}
-
-func (h *handler) Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Fprint(w, "hello!")
+	h.router.POST(signUpURL, h.signUp)
+	h.router.POST(signInURL, h.signIn)
 }
