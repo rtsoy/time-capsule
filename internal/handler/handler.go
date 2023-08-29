@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"time-capsule/internal/service"
 
 	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -14,8 +16,11 @@ const (
 	signUpURL = apiPrefix + "/sign-up"
 	signInURL = apiPrefix + "/sign-in"
 
+	pathCapsuleID = "capsuleID"
+
 	createCapsuleURL = apiPrefix + "/capsules"
 	getCapsulesURL
+	getCapsuleByIDURL = getCapsulesURL + "/:" + pathCapsuleID
 )
 
 type Handler interface {
@@ -47,4 +52,16 @@ func (h *handler) InitRoutes() {
 
 	h.router.POST(createCapsuleURL, h.JWTAuthentication(h.createCapsule))
 	h.router.GET(getCapsulesURL, h.JWTAuthentication(h.getCapsules))
+	h.router.GET(getCapsuleByIDURL, h.JWTAuthentication(h.getCapsuleByID))
+}
+
+func parseObjectIDFromParam(params httprouter.Params, name string) (primitive.ObjectID, error) {
+	id := params.ByName(name)
+
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return primitive.NilObjectID, errors.New("invalid id")
+	}
+
+	return oid, nil
 }

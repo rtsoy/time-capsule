@@ -17,10 +17,10 @@ type UpdateCapsuleDTO struct {
 }
 
 type Capsule struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	UserID    primitive.ObjectID `bson:"userID"`
-	Message   string             `bson:"message"`
-	Images    []string           `bson:"images"`
-	OpenAt    time.Time          `bson:"openAt"`
-	CreatedAt time.Time          `bson:"createdAt"`
+	ID        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	UserID    primitive.ObjectID `json:"userID" bson:"userID"`
+	Message   string             `json:"message" bson:"message"`
+	Images    []string           `json:"images" bson:"images"`
+	OpenAt    time.Time          `json:"openAt" bson:"openAt"`
+	CreatedAt time.Time          `json:"createdAt" bson:"createdAt"`
 }
