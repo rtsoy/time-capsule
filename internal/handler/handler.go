@@ -67,6 +67,7 @@ func (h *handler) InitRoutes() {
 
 	h.router.POST(addCapsuleImage, h.JWTAuthentication(h.addCapsuleImage))
 	h.router.GET(getCapsuleImage, h.JWTAuthentication(h.getCapsuleImage))
+	h.router.DELETE(removeCapsuleImage, h.JWTAuthentication(h.removeCapsuleImage))
 }
 
 func parseObjectIDFromParam(params httprouter.Params, name string) (primitive.ObjectID, error) {

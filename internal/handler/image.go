@@ -13,6 +13,42 @@ import (
 
 const maxUploadSize = 5 << 20 // 5 megabytes
 
+var fileTypes = map[string]interface{}{
+	"image/jpeg": nil,
+	"image/png":  nil,
+}
+
+func (h *handler) removeCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
+	if err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	userID, err := getUserID(r)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	imageID := params.ByName(pathImageID)
+
+	if err = h.storage.Delete(r.Context(), imageID); err != nil {
+		log.Println(err)
+		newErrorResponse(w, errors.New("not found"), http.StatusNotFound)
+		return
+	}
+
+	if err = h.svc.RemoveImage(r.Context(), userID, capsuleID, imageID); err != nil {
+		log.Println(err)
+		newErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return
+}
+
 func (h *handler) getCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
 	if err != nil {
@@ -35,7 +71,8 @@ func (h *handler) getCapsuleImage(w http.ResponseWriter, r *http.Request, params
 
 	file, err := h.storage.Get(r.Context(), imageID)
 	if err != nil {
-		newErrorResponse(w, err)
+		log.Println(err)
+		newErrorResponse(w, errors.New("not found"), http.StatusNotFound)
 		return
 	}
 
@@ -74,6 +111,12 @@ func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params
 	if _, err = file.Read(fileBytes); err != nil {
 		log.Println(err)
 		newErrorResponse(w, errors.New("failed to read the uploaded file"))
+		return
+	}
+
+	fileType := http.DetectContentType(fileBytes)
+	if _, ok := fileTypes[fileType]; !ok {
+		newErrorResponse(w, errors.New("invalid file type"), http.StatusBadRequest)
 		return
 	}
 
