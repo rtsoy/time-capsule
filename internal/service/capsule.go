@@ -138,3 +138,15 @@ func (s *capsuleService) AddImage(ctx context.Context, userID primitive.ObjectID
 		},
 	})
 }
+
+func (s *capsuleService) RemoveImage(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, image string) error {
+	if _, err := s.GetCapsuleByID(ctx, userID, id); err != nil {
+		return err
+	}
+
+	return s.repository.UpdateCapsule(ctx, id, bson.M{
+		"$pull": bson.M{
+			"images": image,
+		},
+	})
+}
