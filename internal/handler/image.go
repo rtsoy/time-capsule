@@ -7,11 +7,45 @@ import (
 
 	"time-capsule/internal/domain"
 
-	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const maxUploadSize = 5 << 20 // 5 megabytes
+
+func (h *handler) getCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
+	if err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	userID, err := getUserID(r)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	if _, err = h.svc.GetCapsuleByID(r.Context(), userID, capsuleID); err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	imageID := params.ByName(pathImageID)
+
+	file, err := h.storage.Get(r.Context(), imageID)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	contentType := http.DetectContentType(file.Bytes)
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(file.Bytes)
+	return
+}
 
 func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
@@ -45,7 +79,7 @@ func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params
 
 	input := domain.File{
 		Bytes: fileBytes,
-		Name:  uuid.New().String(),
+		Name:  primitive.NewObjectID().Hex(),
 		Size:  header.Size,
 	}
 
