@@ -6,6 +6,7 @@ import (
 
 	"time-capsule/internal/domain"
 	"time-capsule/internal/repository"
+	"time-capsule/internal/storage"
 
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,10 +22,10 @@ type Service struct {
 	CapsuleService
 }
 
-func NewService(repository *repository.Repository) *Service {
+func NewService(repository *repository.Repository, storage storage.Storage) *Service {
 	return &Service{
 		UserService:    NewUserService(repository.UserRepository),
-		CapsuleService: NewCapsuleService(repository.CapsuleRepository),
+		CapsuleService: NewCapsuleService(repository.CapsuleRepository, storage),
 	}
 }
 

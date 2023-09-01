@@ -35,7 +35,7 @@ func main() {
 	var (
 		rpstry = repository.NewRepository(db)
 		strge  = storage.NewMinioStorage(minioStorage, cfg.MinioBucketName)
-		svc    = service.NewService(rpstry)
+		svc    = service.NewService(rpstry, strge)
 		hndlr  = handler.NewHandler(svc, strge)
 	)
 

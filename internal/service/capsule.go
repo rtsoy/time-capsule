@@ -8,6 +8,7 @@ import (
 
 	"time-capsule/internal/domain"
 	"time-capsule/internal/repository"
+	"time-capsule/internal/storage"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,11 +23,13 @@ var (
 
 type capsuleService struct {
 	repository repository.CapsuleRepository
+	storage    storage.Storage
 }
 
-func NewCapsuleService(repository repository.CapsuleRepository) CapsuleService {
+func NewCapsuleService(repository repository.CapsuleRepository, storage storage.Storage) CapsuleService {
 	return &capsuleService{
 		repository: repository,
+		storage:    storage,
 	}
 }
 
@@ -119,11 +122,18 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.Obj
 }
 
 func (s *capsuleService) DeleteCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) error {
-	if _, err := s.GetCapsuleByID(ctx, userID, id); err != nil {
+	capsule, err := s.GetCapsuleByID(ctx, userID, id)
+	if err != nil {
 		return err
 	}
 
-	if err := s.repository.DeleteCapsule(ctx, id); err != nil {
+	for _, img := range capsule.Images {
+		if err = s.storage.Delete(ctx, img); err != nil {
+			return err
+		}
+	}
+
+	if err = s.repository.DeleteCapsule(ctx, id); err != nil {
 		log.Println("DeleteCapsule", err)
 		return ErrDBFailure
 	}
