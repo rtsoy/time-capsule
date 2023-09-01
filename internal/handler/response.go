@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"time-capsule/internal/service"
 )
@@ -81,6 +82,9 @@ func handleRequestError(w http.ResponseWriter, err error) {
 	}
 
 	switch err.(type) {
+	case *time.ParseError:
+		newErrorResponse(w, errors.New("invalid timestamp"), http.StatusBadRequest)
+		return
 	case *json.SyntaxError, *json.UnmarshalTypeError, *json.InvalidUnmarshalError, *json.UnsupportedValueError:
 		newErrorResponse(w, errors.New("invalid json"), http.StatusBadRequest)
 		return
