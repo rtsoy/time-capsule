@@ -13,16 +13,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Run(ctx context.Context, cfg *config.Config, repository *repository.Repository) error {
+const workerInterval = 5 * time.Second
+
+// Run periodically checks for expired time capsules, retrieves the associated user information,
+// and sends an email notification to users when their capsules are opened.
+func Run(ctx context.Context, cfg *config.Config, repository *repository.Repository) {
 	log.Println("worker started")
 
 	for {
-		time.Sleep(time.Second * 5) // Todo: Minute / Hour / Day ?
+		time.Sleep(workerInterval) // Todo: Minute / Hour / Day ?
 
 		expiredCapsules, err := repository.GetCapsules(ctx, bson.M{
 			"openAt": bson.M{
 				"$lte": time.Now().UTC(),
 			},
+			"notified": false,
 		})
 		if err != nil {
 			log.Printf("(worker) failed to retrieve capsules: %s\n", err)
@@ -67,16 +72,23 @@ func Run(ctx context.Context, cfg *config.Config, repository *repository.Reposit
 			</html>
             `, "%", user.Username)
 
-			if err := sendEmail(cfg, "Time Capsule Opened!", body, []string{user.Email}); err != nil {
-				log.Println(err) // ? fatal
+			if err = sendEmail(cfg, "Time Capsule Opened!", body, []string{user.Email}); err != nil {
+				log.Println(err)
+				continue
+			}
+
+			if err = repository.UpdateCapsule(ctx, capsule.ID, bson.M{
+				"$set": bson.M{
+					"notified": true,
+				},
+			}); err != nil {
+				log.Println(err)
 				continue
 			}
 
 			fmt.Println("email sent")
 		}
 	}
-
-	return nil
 }
 
 func sendEmail(cfg *config.Config, subject, body string, to []string) error {

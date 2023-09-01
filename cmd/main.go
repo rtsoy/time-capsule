@@ -10,6 +10,7 @@ import (
 	"time-capsule/internal/repository"
 	"time-capsule/internal/service"
 	"time-capsule/internal/storage"
+	"time-capsule/internal/worker"
 	"time-capsule/pkg/minio"
 	"time-capsule/pkg/mongodb"
 )
@@ -38,6 +39,8 @@ func main() {
 		svc    = service.NewService(rpstry, strge)
 		hndlr  = handler.NewHandler(svc, strge)
 	)
+
+	go worker.Run(ctx, cfg, rpstry)
 
 	hndlr.InitRoutes()
 	log.Fatal(http.ListenAndServe(":8080", hndlr.Router()))
