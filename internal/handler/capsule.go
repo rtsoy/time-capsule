@@ -9,6 +9,28 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func (h *handler) deleteCapsule(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	userID, err := getUserID(r)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
+	if err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if err = h.svc.DeleteCapsule(r.Context(), userID, capsuleID); err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return
+}
+
 func (h *handler) updateCapsule(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID, err := getUserID(r)
 	if err != nil {

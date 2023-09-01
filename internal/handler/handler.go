@@ -65,6 +65,7 @@ func (h *handler) InitRoutes() {
 	h.router.GET(getCapsulesURL, h.JWTAuthentication(h.getCapsules))
 	h.router.GET(getCapsuleURL, h.JWTAuthentication(h.getCapsuleByID))
 	h.router.PATCH(updateCapsule, h.JWTAuthentication(h.updateCapsule))
+	h.router.DELETE(deleteCapsule, h.JWTAuthentication(h.deleteCapsule))
 
 	h.router.POST(addCapsuleImage, h.JWTAuthentication(h.addCapsuleImage))
 	h.router.GET(getCapsuleImage, h.JWTAuthentication(h.getCapsuleImage))
