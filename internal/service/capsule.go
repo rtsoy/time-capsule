@@ -95,6 +95,10 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.Obj
 	updateArgs := bson.M{}
 
 	if update.Message != "" {
+		if len(update.Message) < 5 {
+			return ErrShortMessage
+		}
+
 		updateArgs["message"] = update.Message
 	}
 
