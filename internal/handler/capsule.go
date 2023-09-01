@@ -9,6 +9,34 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func (h *handler) updateCapsule(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	userID, err := getUserID(r)
+	if err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
+	if err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	var input domain.UpdateCapsuleDTO
+	if err = json.NewDecoder(r.Body).Decode(&input); err != nil {
+		handleRequestError(w, err)
+		return
+	}
+
+	if err = h.svc.UpdateCapsule(r.Context(), userID, capsuleID, input); err != nil {
+		newErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return
+}
+
 func (h *handler) getCapsuleByID(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID, err := getUserID(r)
 	if err != nil {
