@@ -23,4 +23,5 @@ type Capsule struct {
 	Images    []string           `json:"images" bson:"images"`
 	OpenAt    time.Time          `json:"openAt" bson:"openAt"`
 	CreatedAt time.Time          `json:"createdAt" bson:"createdAt"`
+	Notified  bool               `json:"-" bson:"notified"`
 }
