@@ -71,10 +71,6 @@ func (s *capsuleService) GetAllCapsules(ctx context.Context, userID primitive.Ob
 func (s *capsuleService) GetCapsuleByID(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID) (*domain.Capsule, error) {
 	capsule, err := s.repository.GetCapsule(ctx, bson.M{"_id": id})
 
-	if capsule.UserID != userID {
-		return nil, ErrForbidden
-	}
-
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNotFound
@@ -82,6 +78,10 @@ func (s *capsuleService) GetCapsuleByID(ctx context.Context, userID primitive.Ob
 
 		log.Println("GetCapsuleByID", err)
 		return nil, ErrDBFailure
+	}
+
+	if capsule.UserID != userID {
+		return nil, ErrForbidden
 	}
 
 	return capsule, nil
