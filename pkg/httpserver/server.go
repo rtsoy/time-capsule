@@ -23,7 +23,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Run(cfg *config.Config, handler http.Handler) error {
-	httpServer := &http.Server{
+	s.httpServer = &http.Server{
 		Addr:           ":" + cfg.HttpAddr,
 		Handler:        handler,
 		ReadTimeout:    defaultReadTimeout,
@@ -31,7 +31,7 @@ func (s *Server) Run(cfg *config.Config, handler http.Handler) error {
 		MaxHeaderBytes: defaultMaxHeaderBytes,
 	}
 
-	return httpServer.ListenAndServe()
+	return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
