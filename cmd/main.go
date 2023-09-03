@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
 	"time-capsule/config"
 	"time-capsule/internal/handler"
@@ -11,6 +10,7 @@ import (
 	"time-capsule/internal/service"
 	"time-capsule/internal/storage"
 	"time-capsule/internal/worker"
+	"time-capsule/pkg/httpserver"
 	"time-capsule/pkg/minio"
 	"time-capsule/pkg/mongodb"
 )
@@ -38,9 +38,12 @@ func main() {
 		strge  = storage.NewMinioStorage(minioStorage, cfg.MinioBucketName)
 		svc    = service.NewService(rpstry, strge)
 		hndlr  = handler.NewHandler(svc, strge)
+		srvr   = httpserver.NewServer()
 	)
 
 	go worker.Run(ctx, cfg, rpstry)
 
-	log.Fatal(http.ListenAndServe(":8080", hndlr.Router()))
+	if err = srvr.Run(cfg, hndlr.Router()); err != nil {
+		log.Fatalf("failed to listen on tcp network: %v", err)
+	}
 }

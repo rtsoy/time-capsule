@@ -6,6 +6,8 @@ import (
 )
 
 type Config struct {
+	HttpAddr string `env:"HTTP_ADDR"`
+
 	MongoHost     string `env:"MONGO_HOST"`
 	MongoPort     string `env:"MONGO_PORT"`
 	MongoUsername string `env:"MONGO_USERNAME"`
