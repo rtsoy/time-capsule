@@ -42,6 +42,5 @@ func main() {
 
 	go worker.Run(ctx, cfg, rpstry)
 
-	hndlr.InitRoutes()
 	log.Fatal(http.ListenAndServe(":8080", hndlr.Router()))
 }

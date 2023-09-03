@@ -34,7 +34,6 @@ const (
 
 type Handler interface {
 	Router() http.Handler
-	InitRoutes()
 }
 
 type handler struct {
@@ -46,18 +45,22 @@ type handler struct {
 func NewHandler(svc *service.Service, storage storage.Storage) Handler {
 	router := httprouter.New()
 
-	return &handler{
+	h := &handler{
 		router:  router,
 		svc:     svc,
 		storage: storage,
 	}
+
+	h.initRoutes()
+
+	return h
 }
 
 func (h *handler) Router() http.Handler {
 	return h.router
 }
 
-func (h *handler) InitRoutes() {
+func (h *handler) initRoutes() {
 	h.router.POST(signUpURL, h.signUp)
 	h.router.POST(signInURL, h.signIn)
 
