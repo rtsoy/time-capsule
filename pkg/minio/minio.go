@@ -1,6 +1,7 @@
 package minio
 
 import (
+	"context"
 	"fmt"
 
 	"time-capsule/config"
@@ -15,7 +16,12 @@ func New(cfg *config.Config) (*minio.Client, error) {
 		Secure: false,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("minio connection failed: %s", err)
+		return nil, fmt.Errorf("minio connection failed: %v", err)
+	}
+
+	// Ping
+	if _, err = m.ListBuckets(context.Background()); err != nil {
+		return nil, fmt.Errorf("failed to verify minio connection: %v", err)
 	}
 
 	return m, nil
