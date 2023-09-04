@@ -18,8 +18,6 @@ const workerInterval = 5 * time.Second
 // Run periodically checks for expired time capsules, retrieves the associated user information,
 // and sends an email notification to users when their capsules are opened.
 func Run(ctx context.Context, cfg *config.Config, repository *repository.Repository) {
-	log.Println("worker started")
-
 	for {
 		time.Sleep(workerInterval) // Todo: Minute / Hour / Day ?
 
