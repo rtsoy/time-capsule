@@ -32,6 +32,7 @@ var statusCodes = map[error]int{
 	service.ErrInvalidPassword:  http.StatusBadRequest,
 	service.ErrShortMessage:     http.StatusBadRequest,
 	service.ErrOpenTimeTooEarly: http.StatusBadRequest,
+	service.ErrUpdateTooLate:    http.StatusBadRequest,
 }
 
 type errorResponse struct {

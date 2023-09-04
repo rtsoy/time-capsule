@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -18,13 +19,15 @@ import (
 const (
 	minMessageLength  = 5
 	minOpenAtInterval = 24 * time.Hour
+	maxUpdateInterval = 30 * time.Minute
 )
 
 var (
 	ErrInvalidTime      = errors.New("opening time cannot be before than now")
 	ErrShortMessage     = errors.New("message must be at least 5 characters long")
 	ErrForbidden        = errors.New("not allowed")
-	ErrOpenTimeTooEarly = errors.New("opening time must be at least 24 hours from now")
+	ErrOpenTimeTooEarly = fmt.Errorf("opening time must be at least %d hours from creation date", minOpenAtInterval/time.Hour)
+	ErrUpdateTooLate    = fmt.Errorf("updating the capsule is not allowed after %d minutes from creation", maxUpdateInterval/time.Minute)
 )
 
 type capsuleService struct {
@@ -39,18 +42,16 @@ func NewCapsuleService(repository repository.CapsuleRepository, storage storage.
 	}
 }
 
-// Todo: update capsule only 30 min after creation ?
-
 func (s *capsuleService) CreateCapsule(ctx context.Context, userID primitive.ObjectID, input domain.CreateCapsuleDTO) (*domain.Capsule, error) {
 	if len(input.Message) < minMessageLength {
 		return nil, ErrShortMessage
 	}
 
-	if input.OpenAt.UTC().Before(time.Now().UTC()) {
+	if input.OpenAt.UTC().Before(time.Now().UTC()) || input.OpenAt.UTC().Equal(time.Now().UTC()) {
 		return nil, ErrInvalidTime
 	}
 
-	if time.Now().UTC().Sub(input.OpenAt.UTC()) < minOpenAtInterval {
+	if input.OpenAt.UTC().Sub(time.Now().UTC()) < minOpenAtInterval {
 		return nil, ErrOpenTimeTooEarly
 	}
 
@@ -101,8 +102,13 @@ func (s *capsuleService) GetCapsuleByID(ctx context.Context, userID primitive.Ob
 }
 
 func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error {
-	if _, err := s.GetCapsuleByID(ctx, userID, id); err != nil {
+	capsule, err := s.GetCapsuleByID(ctx, userID, id)
+	if err != nil {
 		return err
+	}
+
+	if time.Now().UTC().Sub(capsule.CreatedAt) > maxUpdateInterval {
+		return ErrUpdateTooLate
 	}
 
 	updateArgs := bson.M{}
@@ -116,14 +122,18 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.Obj
 	}
 
 	if !update.OpenAt.IsZero() {
-		if update.OpenAt.Before(time.Now().UTC()) || update.OpenAt.Equal(time.Now().UTC()) {
+		if update.OpenAt.UTC().Before(time.Now().UTC()) || update.OpenAt.Equal(time.Now().UTC()) {
 			return ErrInvalidTime
+		}
+
+		if update.OpenAt.UTC().Sub(capsule.CreatedAt) < minOpenAtInterval {
+			return ErrOpenTimeTooEarly
 		}
 
 		updateArgs["openAt"] = update.OpenAt
 	}
 
-	if err := s.repository.UpdateCapsule(ctx, id, bson.M{"$set": updateArgs}); err != nil {
+	if err = s.repository.UpdateCapsule(ctx, id, bson.M{"$set": updateArgs}); err != nil {
 		log.Println("UpdateCapsule", err)
 		return ErrDBFailure
 	}
