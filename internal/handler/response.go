@@ -26,11 +26,12 @@ var statusCodes = map[error]int{
 	service.ErrInvalidCredentials: http.StatusUnauthorized,
 	service.ErrTokenExpired:       http.StatusUnauthorized,
 
-	service.ErrInvalidTime:     http.StatusBadRequest, // 400
-	service.ErrInvalidEmail:    http.StatusBadRequest,
-	service.ErrInvalidUsername: http.StatusBadRequest,
-	service.ErrInvalidPassword: http.StatusBadRequest,
-	service.ErrShortMessage:    http.StatusBadRequest,
+	service.ErrInvalidTime:      http.StatusBadRequest, // 400
+	service.ErrInvalidEmail:     http.StatusBadRequest,
+	service.ErrInvalidUsername:  http.StatusBadRequest,
+	service.ErrInvalidPassword:  http.StatusBadRequest,
+	service.ErrShortMessage:     http.StatusBadRequest,
+	service.ErrOpenTimeTooEarly: http.StatusBadRequest,
 }
 
 type errorResponse struct {

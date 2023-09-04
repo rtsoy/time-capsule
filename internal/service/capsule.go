@@ -15,10 +15,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+const (
+	minMessageLength  = 5
+	minOpenAtInterval = 24 * time.Hour
+)
+
 var (
-	ErrInvalidTime  = errors.New("opening time cannot be before than now")
-	ErrShortMessage = errors.New("message must be at least 5 characters long")
-	ErrForbidden    = errors.New("not allowed")
+	ErrInvalidTime      = errors.New("opening time cannot be before than now")
+	ErrShortMessage     = errors.New("message must be at least 5 characters long")
+	ErrForbidden        = errors.New("not allowed")
+	ErrOpenTimeTooEarly = errors.New("opening time must be at least 24 hours from now")
 )
 
 type capsuleService struct {
@@ -33,15 +39,19 @@ func NewCapsuleService(repository repository.CapsuleRepository, storage storage.
 	}
 }
 
-// Todo: min openTime 1 day ? update capsule only 30 min after creation ?
+// Todo: update capsule only 30 min after creation ?
 
 func (s *capsuleService) CreateCapsule(ctx context.Context, userID primitive.ObjectID, input domain.CreateCapsuleDTO) (*domain.Capsule, error) {
-	if len(input.Message) < 5 {
+	if len(input.Message) < minMessageLength {
 		return nil, ErrShortMessage
 	}
 
 	if input.OpenAt.UTC().Before(time.Now().UTC()) {
 		return nil, ErrInvalidTime
+	}
+
+	if time.Now().UTC().Sub(input.OpenAt.UTC()) < minOpenAtInterval {
+		return nil, ErrOpenTimeTooEarly
 	}
 
 	toInsert := &domain.Capsule{
@@ -98,7 +108,7 @@ func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.Obj
 	updateArgs := bson.M{}
 
 	if update.Message != "" {
-		if len(update.Message) < 5 {
+		if len(update.Message) < minMessageLength {
 			return ErrShortMessage
 		}
 
