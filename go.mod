@@ -6,8 +6,10 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/joho/godotenv v1.5.1
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/minio/minio-go/v7 v7.0.62
 	go.mongodb.org/mongo-driver v1.12.1
+	go.uber.org/mock v0.2.0
 	golang.org/x/crypto v0.12.0
 )
 
@@ -17,7 +19,6 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
