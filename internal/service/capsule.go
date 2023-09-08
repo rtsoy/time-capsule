@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"time"
 
 	"time-capsule/internal/domain"
@@ -26,6 +27,8 @@ var (
 	ErrInvalidTime      = errors.New("opening time cannot be before than now")
 	ErrShortMessage     = errors.New("message must be at least 5 characters long")
 	ErrForbidden        = errors.New("not allowed")
+	ErrStorageFailure   = errors.New("something went wrong... try again later :(")
+	ErrEmptyUpdate      = errors.New("no changes to apply")
 	ErrOpenTimeTooEarly = fmt.Errorf("opening time must be at least %d hours from creation date", minOpenAtInterval/time.Hour)
 	ErrUpdateTooLate    = fmt.Errorf("updating the capsule is not allowed after %d minutes from creation", maxUpdateInterval/time.Minute)
 )
@@ -102,6 +105,10 @@ func (s *capsuleService) GetCapsuleByID(ctx context.Context, userID primitive.Ob
 }
 
 func (s *capsuleService) UpdateCapsule(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, update domain.UpdateCapsuleDTO) error {
+	if reflect.DeepEqual(update, domain.UpdateCapsuleDTO{}) {
+		return ErrEmptyUpdate
+	}
+
 	capsule, err := s.GetCapsuleByID(ctx, userID, id)
 	if err != nil {
 		return err
@@ -149,7 +156,8 @@ func (s *capsuleService) DeleteCapsule(ctx context.Context, userID primitive.Obj
 
 	for _, img := range capsule.Images {
 		if err = s.storage.Delete(ctx, img); err != nil {
-			return err
+			log.Println("DeleteCapsule", err)
+			return ErrStorageFailure
 		}
 	}
 
@@ -166,11 +174,16 @@ func (s *capsuleService) AddImage(ctx context.Context, userID primitive.ObjectID
 		return err
 	}
 
-	return s.repository.UpdateCapsule(ctx, id, bson.M{
+	if err := s.repository.UpdateCapsule(ctx, id, bson.M{
 		"$push": bson.M{
 			"images": image,
 		},
-	})
+	}); err != nil {
+		log.Println("AddImage", err)
+		return ErrDBFailure
+	}
+
+	return nil
 }
 
 func (s *capsuleService) RemoveImage(ctx context.Context, userID primitive.ObjectID, id primitive.ObjectID, image string) error {
@@ -178,9 +191,14 @@ func (s *capsuleService) RemoveImage(ctx context.Context, userID primitive.Objec
 		return err
 	}
 
-	return s.repository.UpdateCapsule(ctx, id, bson.M{
+	if err := s.repository.UpdateCapsule(ctx, id, bson.M{
 		"$pull": bson.M{
 			"images": image,
 		},
-	})
+	}); err != nil {
+		log.Println("RemoveImage", err)
+		return ErrDBFailure
+	}
+
+	return nil
 }
