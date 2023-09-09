@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -27,6 +28,7 @@ const (
 )
 
 var (
+	ErrTokenCreationFailed = errors.New("failed to create a token")
 	ErrPasswordHashFailure = errors.New("failed to hash a password")
 	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrInvalidToken        = errors.New("invalid token")
@@ -113,15 +115,17 @@ func (s *userService) GenerateToken(ctx context.Context, email, password string)
 
 	secret := os.Getenv("JWT_SECRET")
 
-	return token.SignedString([]byte(secret))
+	signed, err := token.SignedString([]byte(secret))
+	if err != nil {
+		fmt.Println("GenerateToken", err)
+		return "", ErrTokenCreationFailed
+	}
+
+	return signed, nil
 }
 
 func (s *userService) ParseToken(accessToken string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrInvalidToken
-		}
-
 		secret := os.Getenv("JWT_SECRET")
 		return []byte(secret), nil
 	})
@@ -130,6 +134,7 @@ func (s *userService) ParseToken(accessToken string) (jwt.MapClaims, error) {
 			return nil, ErrTokenExpired
 		}
 
+		fmt.Println("ParseToken1", err)
 		return nil, ErrInvalidToken
 	}
 
@@ -137,6 +142,7 @@ func (s *userService) ParseToken(accessToken string) (jwt.MapClaims, error) {
 		return claims, nil
 	}
 
+	fmt.Println("ParseToken2", err)
 	return nil, ErrInvalidToken
 }
 

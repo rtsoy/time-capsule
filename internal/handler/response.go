@@ -14,13 +14,15 @@ import (
 var statusCodes = map[error]int{
 	service.ErrDBFailure:           http.StatusInternalServerError, // 500
 	service.ErrPasswordHashFailure: http.StatusInternalServerError,
+	service.ErrStorageFailure:      http.StatusInternalServerError,
+	service.ErrTokenCreationFailed: http.StatusInternalServerError,
 
 	service.ErrUsernameDuplicate: http.StatusConflict, // 409
 	service.ErrEmailDuplicate:    http.StatusConflict,
 
 	service.ErrNotFound: http.StatusNotFound, // 404
 
-	service.ErrForbidden: http.StatusForbidden,
+	service.ErrForbidden: http.StatusForbidden, // 403
 
 	service.ErrInvalidToken:       http.StatusUnauthorized, // 401
 	service.ErrInvalidCredentials: http.StatusUnauthorized,
@@ -33,6 +35,7 @@ var statusCodes = map[error]int{
 	service.ErrShortMessage:     http.StatusBadRequest,
 	service.ErrOpenTimeTooEarly: http.StatusBadRequest,
 	service.ErrUpdateTooLate:    http.StatusBadRequest,
+	service.ErrEmptyUpdate:      http.StatusBadRequest,
 }
 
 type errorResponse struct {
