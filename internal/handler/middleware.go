@@ -50,7 +50,12 @@ func (h *handler) JWTAuthentication(next httprouter.Handle) httprouter.Handle {
 }
 
 func getUserID(r *http.Request) (primitive.ObjectID, error) {
-	id := r.Context().Value(userCtx).(string)
+	id, ok := r.Context().Value(userCtx).(string)
+	if !ok {
+		log.Println("getUserID", "failed to convert", r.Context().Value(userCtx))
+		return primitive.NilObjectID, errors.New("internal server error")
+	}
+
 	if id == "" {
 		log.Println("getUserID", "empty userId in context")
 		return primitive.NilObjectID, errors.New("internal server error")

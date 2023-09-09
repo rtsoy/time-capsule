@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -128,6 +129,67 @@ func TestMiddlewareHandler_JWTAuthentication(t *testing.T) {
 
 			assert.Equal(t, test.expectedStatusCode, w.Code)
 			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
+func TestMiddlewareHandler_getUserID(t *testing.T) {
+	tests := []struct {
+		name          string
+		request       func() *http.Request
+		userID        primitive.ObjectID
+		expectedError error
+	}{
+		{
+			name: "OK",
+			request: func() *http.Request {
+				r := &http.Request{}
+
+				return r.WithContext(context.WithValue(r.Context(), userCtx, primitive.NilObjectID.Hex()))
+			},
+			userID:        primitive.NilObjectID,
+			expectedError: nil,
+		},
+		{
+			name: "Conversion-Failure",
+			request: func() *http.Request {
+				r := &http.Request{}
+				return r
+			},
+			userID:        primitive.NilObjectID,
+			expectedError: errors.New("internal server error"),
+		},
+		{
+			name: "Empty-Context-UserID",
+			request: func() *http.Request {
+				r := &http.Request{}
+
+				return r.WithContext(context.WithValue(r.Context(), userCtx, ""))
+			},
+			userID:        primitive.NilObjectID,
+			expectedError: errors.New("internal server error"),
+		},
+		{
+			name: "Not-ObjectID",
+			request: func() *http.Request {
+				r := &http.Request{}
+
+				return r.WithContext(context.WithValue(r.Context(), userCtx, "some_id"))
+			},
+			userID:        primitive.NilObjectID,
+			expectedError: errors.New("internal server error"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			oid, err := getUserID(test.request())
+
+			if err != nil {
+				assert.Equal(t, test.expectedError, err)
+			} else {
+				assert.Equal(t, oid, test.userID)
+			}
 		})
 	}
 }
