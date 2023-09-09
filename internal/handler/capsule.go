@@ -23,7 +23,7 @@ func (h *handler) deleteCapsule(w http.ResponseWriter, r *http.Request, params h
 	}
 
 	if err = h.svc.DeleteCapsule(r.Context(), userID, capsuleID); err != nil {
-		newErrorResponse(w, err, http.StatusBadRequest)
+		newErrorResponse(w, err)
 		return
 	}
 
