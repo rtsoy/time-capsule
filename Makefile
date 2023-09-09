@@ -1,3 +1,7 @@
+gen-svc-mocks:
+	mockgen -source=internal/service/service.go \
+	 		-destination=internal/service/mocks/mock.go
+
 gen-repo-mocks:
 	mockgen -source=internal/repository/repository.go \
 	 		-destination=internal/repository/mocks/mock.go
