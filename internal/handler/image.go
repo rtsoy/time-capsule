@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"path"
 
 	"time-capsule/internal/domain"
 
@@ -31,17 +32,21 @@ func (h *handler) removeCapsuleImage(w http.ResponseWriter, r *http.Request, par
 		return
 	}
 
-	imageID := params.ByName(pathImageID)
-
-	if err = h.storage.Delete(r.Context(), imageID); err != nil {
-		log.Println(err)
-		newErrorResponse(w, errors.New("not found"), http.StatusNotFound)
+	imageID, err := parseObjectIDFromParam(params, pathImageID)
+	if err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
 		return
 	}
 
-	if err = h.svc.RemoveImage(r.Context(), userID, capsuleID, imageID); err != nil {
+	if err = h.svc.RemoveImage(r.Context(), userID, capsuleID, imageID.Hex()); err != nil {
 		log.Println(err)
 		newErrorResponse(w, err)
+		return
+	}
+
+	if err = h.storage.Delete(r.Context(), imageID.Hex()); err != nil {
+		log.Println(err)
+		newErrorResponse(w, errors.New("internal server error"), http.StatusInternalServerError)
 		return
 	}
 
@@ -62,14 +67,18 @@ func (h *handler) getCapsuleImage(w http.ResponseWriter, r *http.Request, params
 		return
 	}
 
+	imageID, err := parseObjectIDFromParam(params, pathImageID)
+	if err != nil {
+		newErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
 	if _, err = h.svc.GetCapsuleByID(r.Context(), userID, capsuleID); err != nil {
 		newErrorResponse(w, err)
 		return
 	}
 
-	imageID := params.ByName(pathImageID)
-
-	file, err := h.storage.Get(r.Context(), imageID)
+	file, err := h.storage.Get(r.Context(), imageID.Hex())
 	if err != nil {
 		log.Println(err)
 		newErrorResponse(w, errors.New("not found"), http.StatusNotFound)
@@ -102,15 +111,15 @@ func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params
 	file, header, err := r.FormFile("image")
 	if err != nil {
 		log.Println(err)
-		newErrorResponse(w, errors.New("unable to parse the form"))
+		newErrorResponse(w, errors.New("unable to parse the form"), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
 	fileBytes := make([]byte, header.Size)
 	if _, err = file.Read(fileBytes); err != nil {
-		log.Println(err)
-		newErrorResponse(w, errors.New("failed to read the uploaded file"))
+		log.Println("addCapsuleImage", err)
+		newErrorResponse(w, errors.New("failed to read the uploaded file"), http.StatusBadRequest)
 		return
 	}
 
@@ -120,9 +129,11 @@ func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params
 		return
 	}
 
+	ext := path.Ext(header.Filename)
+
 	input := domain.File{
 		Bytes: fileBytes,
-		Name:  primitive.NewObjectID().Hex(),
+		Name:  primitive.NewObjectID().Hex() + ext,
 		Size:  header.Size,
 	}
 
