@@ -12,7 +12,7 @@ import (
 
 func New(cfg *config.Config) (*minio.Client, error) {
 	m, err := minio.New(fmt.Sprintf("%s:%s", cfg.MinioHost, cfg.MinioPort), &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.MinioAccessKey, cfg.MinioSecretKey, ""),
+		Creds:  credentials.NewStaticV4(cfg.MinioUsername, cfg.MinioPassword, ""),
 		Secure: false,
 	})
 	if err != nil {
