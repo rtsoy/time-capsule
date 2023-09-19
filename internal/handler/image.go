@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"path"
 
 	"time-capsule/internal/domain"
 
@@ -129,11 +128,9 @@ func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params
 		return
 	}
 
-	ext := path.Ext(header.Filename)
-
 	input := domain.File{
 		Bytes: fileBytes,
-		Name:  primitive.NewObjectID().Hex() + ext,
+		Name:  primitive.NewObjectID().Hex(),
 		Size:  header.Size,
 	}
 

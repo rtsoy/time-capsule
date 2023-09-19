@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path"
 	"strings"
 	"testing"
 
@@ -364,7 +363,7 @@ func TestImageHandler_addCapsuleImage(t *testing.T) {
 			capsuleIDHex:         primitive.NilObjectID.Hex(),
 			uploadInput:          "./fixtures/images/ok.png",
 			expectedStatusCode:   http.StatusCreated,
-			expectedResponseBody: `{"name":"000000000000000000000000.png","size":21656}`,
+			expectedResponseBody: `{"name":"000000000000000000000000","size":21656}`,
 		},
 		{
 			name: "OK-JPEG",
@@ -379,7 +378,7 @@ func TestImageHandler_addCapsuleImage(t *testing.T) {
 			capsuleIDHex:         primitive.NilObjectID.Hex(),
 			uploadInput:          "./fixtures/images/ok.jpg",
 			expectedStatusCode:   http.StatusCreated,
-			expectedResponseBody: `{"name":"000000000000000000000000.jpg","size":14327}`,
+			expectedResponseBody: `{"name":"000000000000000000000000","size":14327}`,
 		},
 		{
 			name: "Invalid-Context",
@@ -489,11 +488,9 @@ func TestImageHandler_addCapsuleImage(t *testing.T) {
 			_, err = file.Read(fileBytes)
 			assert.NoError(t, err)
 
-			ext := path.Ext(stat.Name())
-
 			test.inputData.Bytes = fileBytes
 			test.inputData.Size = stat.Size()
-			test.inputData.Name = primitive.NewObjectID().Hex() + ext
+			test.inputData.Name = primitive.NewObjectID().Hex()
 
 			var (
 				ctx = context.WithValue(context.Background(), userCtx, test.ctxUserID)
