@@ -21,8 +21,8 @@ type Config struct {
 
 	MinioHost       string `env:"MINIO_HOST"`
 	MinioPort       string `env:"MINIO_PORT"`
-	MinioAccessKey  string `env:"ACCESS_KEY"`
-	MinioSecretKey  string `env:"SECRET_KEY"`
+	MinioUsername   string `env:"MINIO_USERNAME"`
+	MinioPassword   string `env:"MINIO_PASSWORD"`
 	MinioBucketName string `env:"BUCKET_NAME"`
 }
 
