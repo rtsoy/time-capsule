@@ -22,6 +22,7 @@ const (
 var (
 	token     string
 	capsuleID string
+	imageID   string
 )
 
 func TestMain(m *testing.M) {

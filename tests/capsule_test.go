@@ -83,7 +83,7 @@ func TestHTTP_DeleteCapsule(t *testing.T) {
 	reqURL := basePath + "/capsules/" + capsuleID
 
 	Test(t,
-		Description("Get Capsule Success"),
+		Description("Delete Capsule Success"),
 		Delete(reqURL),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Headers("Authorization").Add("Bearer "+token),
