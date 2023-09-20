@@ -1,6 +1,6 @@
 # Remaining Plans:
 
-### ✅ Tests (e2e, integration, unit)
+### 🔏 Lint
 ### 📚 Swagger
-### 🐳 Dockerize 
+### 😎 Rate Limiting / Cache
 ### 🔧 CI/CD 
