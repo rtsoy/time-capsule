@@ -25,8 +25,7 @@ func TestHTTP_AddImage(t *testing.T) {
 	Test(t,
 		Description("Add Image Create Capsule Success"),
 		Post(basePath+"/capsules"),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Headers("Authorization").Add(fmt.Sprintf("Bearer %s", token)),
+		headers,
 		Send().Body().String(body),
 		Expect().Status().Equal(http.StatusCreated),
 		Expect().Body().JSON().JQ(".message").Equal("test message"),
@@ -89,8 +88,7 @@ func TestHTTP_GetImage(t *testing.T) {
 	Test(t,
 		Description("Get Image Success"),
 		Get(basePath+"/capsules/"+capsuleID+"/images/"+imageID),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Headers("Authorization").Add(fmt.Sprintf("Bearer %s", token)),
+		headers,
 		Expect().Status().Equal(http.StatusOK),
 		Expect().Body().Bytes().Equal(fileBytes),
 	)
@@ -100,16 +98,14 @@ func TestHTTP_RemoveImage(t *testing.T) {
 	Test(t,
 		Description("Delete Image Success"),
 		Delete(basePath+"/capsules/"+capsuleID+"/images/"+imageID),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Headers("Authorization").Add(fmt.Sprintf("Bearer %s", token)),
+		headers,
 		Expect().Status().Equal(http.StatusNoContent),
 	)
 
 	Test(t,
 		Description("Get Deleted Image Success"),
 		Get(basePath+"/capsules/"+capsuleID+"/images/"+imageID),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Headers("Authorization").Add(fmt.Sprintf("Bearer %s", token)),
+		headers,
 		Expect().Status().Equal(http.StatusNotFound),
 		Expect().Body().JSON().JQ(".message").Equal("not found"),
 	)
