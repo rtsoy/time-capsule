@@ -61,6 +61,8 @@ func (h *handler) Router() http.Handler {
 }
 
 func (h *handler) initRoutes() {
+	h.router.ServeFiles("/swagger/*filepath", http.Dir("docs"))
+
 	h.router.POST(signUpURL, h.signUp)
 	h.router.POST(signInURL, h.signIn)
 

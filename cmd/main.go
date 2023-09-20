@@ -7,6 +7,13 @@ import (
 	"time-capsule/internal/app"
 )
 
+// @title TimeCapsule
+// @version 1.0
+// @description API Server for TimeCapsule Application
+
+// @host localhost:8080
+// @Basepath /
+
 func main() {
 	cfg, err := config.New()
 	if err != nil {
