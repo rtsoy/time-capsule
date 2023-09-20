@@ -41,4 +41,9 @@ func TestHTTP_SignIn(t *testing.T) {
 		Expect().Body().JSON().Contains("token"),
 		Store().Response().Body().JSON().JQ(".token").In(&token),
 	)
+
+	headers = CombineSteps(
+		Send().Headers("Content-Type").Add("application/json"),
+		Send().Headers("Authorization").Add("Bearer "+token),
+	)
 }

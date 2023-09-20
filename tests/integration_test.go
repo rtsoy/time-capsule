@@ -24,10 +24,7 @@ var (
 	capsuleID string
 	imageID   string
 
-	headers = CombineSteps(
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Headers("Authorization").Add("Bearer "+token),
-	)
+	headers IStep
 )
 
 func TestMain(m *testing.M) {
