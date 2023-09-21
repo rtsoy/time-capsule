@@ -1,9 +1,115 @@
 basePath: /
+definitions:
+  domain.CreateUserDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  domain.LogInUserDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      registeredAt:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  handler.tokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: API Server for TimeCapsule Application
   title: TimeCapsule
   version: "1.0"
-paths: {}
+paths:
+  /api/v1/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LogInUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: SignIn
+      tags:
+      - Auth
+  /api/v1/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Creates new account
+      parameters:
+      - description: Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: SignUp
+      tags:
+      - Auth
 swagger: "2.0"

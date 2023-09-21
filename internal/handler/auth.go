@@ -9,6 +9,23 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type tokenResponse struct {
+	Token string `json:"token"`
+}
+
+// SignIn | Login
+//
+//	@Summary      SignIn
+//	@Description  Login
+//	@Tags         Auth
+//	@Accept       json
+//	@Produce      json
+//	@Param        input body      domain.LogInUserDTO true "Input"
+//	@Success      200   {object}  tokenResponse
+//	@Failure      400   {object}  errorResponse
+//	@Failure      401   {object}  errorResponse
+//	@Failure      500   {object}  errorResponse
+//	@Router       /api/v1/sign-in [post]
 func (h *handler) signIn(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var input domain.LogInUserDTO
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -22,12 +39,23 @@ func (h *handler) signIn(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 		return
 	}
 
-	newJSONResponse(w, map[string]string{
-		"token": token,
-	})
+	newJSONResponse(w, tokenResponse{Token: token})
 	return
 }
 
+// SignUp | Creates New Account
+//
+//	@Summary      SignUp
+//	@Description  Creates new account
+//	@Tags         Auth
+//	@Accept       json
+//	@Produce      json
+//	@Param        input body      domain.CreateUserDTO true "Input"
+//	@Success      201   {object}  domain.User
+//	@Failure      400   {object}  errorResponse
+//	@Failure      409   {object}  errorResponse
+//	@Failure      500   {object}  errorResponse
+//	@Router       /api/v1/sign-up [post]
 func (h *handler) signUp(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var input domain.CreateUserDTO
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
