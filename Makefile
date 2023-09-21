@@ -10,6 +10,9 @@ integration-test:
 	@echo "Deleting test containers..."
 	@docker-compose -p time-capsule-test -f docker-compose-test.yml rm -fsv > nul
 
+swag:
+	@swag init -g cmd/main.go
+
 gen-svc-mocks:
 	@mockgen -source=internal/service/service.go \
 	 		-destination=internal/service/mocks/mock.go
