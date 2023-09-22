@@ -18,6 +18,21 @@ var fileTypes = map[string]interface{}{
 	"image/png":  nil,
 }
 
+// RemoveImage | Removes Image
+//
+//	@Summary      RemoveImage
+//	@Security     ApiKeyAuth
+//	@Description  Removes an image
+//	@Tags         Images
+//	@Produce      json
+//	@Param        capsuleID    path      string true "capsuleID"
+//	@Param        imageID      path      string true "imageID"
+//	@Success      204
+//	@Failure      401          {object}  errorResponse
+//	@Failure      403          {object}  errorResponse
+//	@Failure      404          {object}  errorResponse
+//	@Failure      500          {object}  errorResponse
+//	@Router       /api/v1/capsules/{capsuleID}/images/{imageID} [delete]
 func (h *handler) removeCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
 	if err != nil {
@@ -53,6 +68,21 @@ func (h *handler) removeCapsuleImage(w http.ResponseWriter, r *http.Request, par
 	return
 }
 
+// GetImage | Retrieves The Image
+//
+//	@Summary      GetImage
+//	@Security     ApiKeyAuth
+//	@Description  Retrieves the image
+//	@Tags         Images
+//	@Produce      image/png, image/jpeg, application/json
+//	@Param        capsuleID    path      string true "capsuleID"
+//	@Param        imageID      path      string true "imageID"
+//	@Success      200          {object}  domain.File
+//	@Failure      401   	   {object}  errorResponse
+//	@Failure      403   	   {object}  errorResponse
+//	@Failure      404   	   {object}  errorResponse
+//	@Failure      500   	   {object}  errorResponse
+//	@Router       /api/v1/capsules/{capsuleID}/images/{imageID} [get]
 func (h *handler) getCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
 	if err != nil {
@@ -92,6 +122,21 @@ func (h *handler) getCapsuleImage(w http.ResponseWriter, r *http.Request, params
 	return
 }
 
+// AddImage | Adds An Image To The Capsule
+//
+//	@Summary      AddImage
+//	@Security     ApiKeyAuth
+//	@Description  Adds an image to the capsule
+//	@Tags         Images
+//	@Accept       mpfd
+//	@Produce      json
+//	@Param        capsuleID    path      string true "capsuleID"
+//	@Param        image        formData  file true "image"
+//	@Success      201          {object}  domain.File
+//	@Failure      400          {object}  errorResponse
+//	@Failure      401   	   {object}  errorResponse
+//	@Failure      500          {object}  errorResponse
+//	@Router       /api/v1/capsules/{capsuleID}/images [post]
 func (h *handler) addCapsuleImage(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	capsuleID, err := parseObjectIDFromParam(params, pathCapsuleID)
 	if err != nil {

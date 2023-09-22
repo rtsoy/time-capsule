@@ -33,6 +33,13 @@ definitions:
       username:
         type: string
     type: object
+  domain.File:
+    properties:
+      name:
+        type: string
+      size:
+        type: integer
+    type: object
   domain.LogInUserDTO:
     properties:
       email:
@@ -250,6 +257,129 @@ paths:
       summary: GetCapsule
       tags:
       - Capsules
+  /api/v1/capsules/{capsuleID}/images:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Adds an image to the capsule
+      parameters:
+      - description: capsuleID
+        in: path
+        name: capsuleID
+        required: true
+        type: string
+      - description: image
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: AddImage
+      tags:
+      - Images
+  /api/v1/capsules/{capsuleID}/images/{imageID}:
+    delete:
+      description: Removes an image
+      parameters:
+      - description: capsuleID
+        in: path
+        name: capsuleID
+        required: true
+        type: string
+      - description: imageID
+        in: path
+        name: imageID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: RemoveImage
+      tags:
+      - Images
+    get:
+      description: Retrieves the image
+      parameters:
+      - description: capsuleID
+        in: path
+        name: capsuleID
+        required: true
+        type: string
+      - description: imageID
+        in: path
+        name: imageID
+        required: true
+        type: string
+      produces:
+      - image/png
+      - ' image/jpeg'
+      - ' application/json'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.File'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetImage
+      tags:
+      - Images
   /api/v1/sign-in:
     post:
       consumes:
