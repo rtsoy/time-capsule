@@ -1,5 +1,29 @@
 basePath: /
 definitions:
+  domain.Capsule:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      images:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+      openAt:
+        type: string
+      userID:
+        type: string
+    type: object
+  domain.CreateCapsuleDTO:
+    properties:
+      message:
+        type: string
+      openAt:
+        type: string
+    type: object
   domain.CreateUserDTO:
     properties:
       email:
@@ -14,6 +38,13 @@ definitions:
       email:
         type: string
       password:
+        type: string
+    type: object
+  domain.UpdateCapsuleDTO:
+    properties:
+      message:
+        type: string
+      openAt:
         type: string
     type: object
   domain.User:
@@ -44,6 +75,181 @@ info:
   title: TimeCapsule
   version: "1.0"
 paths:
+  /api/v1/capsules:
+    get:
+      description: Retrieves all capsules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Capsule'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetCapsules
+      tags:
+      - Capsules
+    post:
+      consumes:
+      - application/json
+      description: Creates new capsule
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateCapsuleDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Capsule'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: CreateCapsule
+      tags:
+      - Capsules
+  /api/v1/capsules/{capsuleID}:
+    delete:
+      description: Removes capsule
+      parameters:
+      - description: capsuleID
+        in: path
+        name: capsuleID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetCapsule
+      tags:
+      - Capsules
+    get:
+      description: Retrieves capsule by ID
+      parameters:
+      - description: capsuleID
+        in: path
+        name: capsuleID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Capsule'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetCapsule
+      tags:
+      - Capsules
+    patch:
+      description: Updates capsule
+      parameters:
+      - description: capsuleID
+        in: path
+        name: capsuleID
+        required: true
+        type: string
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateCapsuleDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetCapsule
+      tags:
+      - Capsules
   /api/v1/sign-in:
     post:
       consumes:
@@ -112,4 +318,9 @@ paths:
       summary: SignUp
       tags:
       - Auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
