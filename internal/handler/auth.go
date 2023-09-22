@@ -16,7 +16,7 @@ type tokenResponse struct {
 // SignIn | Login
 //
 //	@Summary      SignIn
-//	@Description  Login
+//	@Description  Log in
 //	@Tags         Auth
 //	@Accept       json
 //	@Produce      json
@@ -46,7 +46,7 @@ func (h *handler) signIn(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 // SignUp | Creates New Account
 //
 //	@Summary      SignUp
-//	@Description  Creates new account
+//	@Description  Creates a new account
 //	@Tags         Auth
 //	@Accept       json
 //	@Produce      json

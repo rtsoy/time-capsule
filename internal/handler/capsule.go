@@ -11,9 +11,9 @@ import (
 
 // DeleteCapsule | Removes Capsule
 //
-//	@Summary      GetCapsule
+//	@Summary      DeleteCapsule
 //	@Security     ApiKeyAuth
-//	@Description  Removes capsule
+//	@Description  Removes a capsule
 //	@Tags         Capsules
 //	@Produce      json
 //	@Param        capsuleID    path      string true "capsuleID"
@@ -47,9 +47,9 @@ func (h *handler) deleteCapsule(w http.ResponseWriter, r *http.Request, params h
 
 // UpdateCapsule | Updates Capsule
 //
-//	@Summary      GetCapsule
+//	@Summary      UpdateCapsule
 //	@Security     ApiKeyAuth
-//	@Description  Updates capsule
+//	@Description  Updates a capsule
 //	@Tags         Capsules
 //	@Produce      json
 //	@Param        capsuleID    path      string true "capsuleID"
@@ -93,7 +93,7 @@ func (h *handler) updateCapsule(w http.ResponseWriter, r *http.Request, params h
 //
 //	@Summary      GetCapsule
 //	@Security     ApiKeyAuth
-//	@Description  Retrieves capsule by ID
+//	@Description  Retrieves a capsule by ID
 //	@Tags         Capsules
 //	@Produce      json
 //	@Param        capsuleID    path      string true "capsuleID"
@@ -158,7 +158,7 @@ func (h *handler) getCapsules(w http.ResponseWriter, r *http.Request, _ httprout
 //
 //	@Summary      CreateCapsule
 //	@Security     ApiKeyAuth
-//	@Description  Creates new capsule
+//	@Description  Creates a new capsule
 //	@Tags         Capsules
 //	@Accept       json
 //	@Produce      json
