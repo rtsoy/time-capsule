@@ -19,6 +19,59 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+func TestMiddlewareHandler_RateLimiter(t *testing.T) {
+	tests := []struct {
+		name                 string
+		requests             int
+		expectedStatusCode   int
+		expectedResponseBody string
+	}{
+		{
+			name:                 "OK",
+			requests:             requestRateLimit - 1,
+			expectedStatusCode:   http.StatusOK,
+			expectedResponseBody: "ok",
+		},
+		{
+			name:                 "Rate Limit",
+			requests:             requestRateLimit + 1,
+			expectedStatusCode:   http.StatusTooManyRequests,
+			expectedResponseBody: `{"message":"rate limit exceeded"}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var (
+				router = httprouter.New()
+
+				hndlr = &handler{
+					router:  router,
+					svc:     nil,
+					storage: nil,
+				}
+			)
+
+			router.GET("/", hndlr.RateLimiter(func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprint(w, "ok")
+			}))
+
+			var w *httptest.ResponseRecorder
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			for i := 0; i < test.requests; i++ {
+				w = httptest.NewRecorder()
+
+				router.ServeHTTP(w, req)
+			}
+
+			assert.Equal(t, test.expectedStatusCode, w.Code)
+			assert.Equal(t, test.expectedResponseBody, w.Body.String())
+		})
+	}
+}
+
 func TestMiddlewareHandler_JWTAuthentication(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockUserService, token string)
 

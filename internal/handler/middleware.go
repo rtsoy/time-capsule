@@ -6,12 +6,32 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/time/rate"
 )
 
-const userCtx = "userID"
+const (
+	userCtx = "userID"
+
+	requestRateTimeout = 1 * time.Second
+	requestRateLimit   = 20
+)
+
+var limiter = rate.NewLimiter(rate.Every(requestRateTimeout), requestRateLimit)
+
+func (h *handler) RateLimiter(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		if !limiter.Allow() {
+			newErrorResponse(w, errors.New("rate limit exceeded"), http.StatusTooManyRequests)
+			return
+		}
+
+		next(w, r, params)
+	}
+}
 
 func (h *handler) JWTAuthentication(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {

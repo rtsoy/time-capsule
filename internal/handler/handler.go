@@ -63,18 +63,18 @@ func (h *handler) Router() http.Handler {
 func (h *handler) initRoutes() {
 	h.router.ServeFiles("/swagger/*filepath", http.Dir("docs"))
 
-	h.router.POST(signUpURL, h.signUp)
-	h.router.POST(signInURL, h.signIn)
+	h.router.POST(signUpURL, h.RateLimiter(h.signUp))
+	h.router.POST(signInURL, h.RateLimiter(h.signIn))
 
-	h.router.POST(createCapsuleURL, h.JWTAuthentication(h.createCapsule))
-	h.router.GET(getCapsulesURL, h.JWTAuthentication(h.getCapsules))
-	h.router.GET(getCapsuleURL, h.JWTAuthentication(h.getCapsuleByID))
-	h.router.PATCH(updateCapsule, h.JWTAuthentication(h.updateCapsule))
-	h.router.DELETE(deleteCapsule, h.JWTAuthentication(h.deleteCapsule))
+	h.router.POST(createCapsuleURL, h.RateLimiter(h.JWTAuthentication(h.createCapsule)))
+	h.router.GET(getCapsulesURL, h.RateLimiter(h.JWTAuthentication(h.getCapsules)))
+	h.router.GET(getCapsuleURL, h.RateLimiter(h.JWTAuthentication(h.getCapsuleByID)))
+	h.router.PATCH(updateCapsule, h.RateLimiter(h.JWTAuthentication(h.updateCapsule)))
+	h.router.DELETE(deleteCapsule, h.RateLimiter(h.JWTAuthentication(h.deleteCapsule)))
 
-	h.router.POST(addCapsuleImage, h.JWTAuthentication(h.addCapsuleImage))
-	h.router.GET(getCapsuleImage, h.JWTAuthentication(h.getCapsuleImage))
-	h.router.DELETE(removeCapsuleImage, h.JWTAuthentication(h.removeCapsuleImage))
+	h.router.POST(addCapsuleImage, h.RateLimiter(h.JWTAuthentication(h.addCapsuleImage)))
+	h.router.GET(getCapsuleImage, h.RateLimiter(h.JWTAuthentication(h.getCapsuleImage)))
+	h.router.DELETE(removeCapsuleImage, h.RateLimiter(h.JWTAuthentication(h.removeCapsuleImage)))
 }
 
 func parseObjectIDFromParam(params httprouter.Params, name string) (primitive.ObjectID, error) {
