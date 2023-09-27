@@ -1,6 +1,9 @@
 run:
 	@docker-compose -f docker-compose.yml up
 
+lint:
+	@golangci-lint run
+
 integration-test:
 	@echo "Starting test containers..."
 	@docker-compose -p time-capsule-test -f docker-compose-test.yml up -d > nul
