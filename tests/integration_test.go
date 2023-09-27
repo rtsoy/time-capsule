@@ -29,7 +29,7 @@ var (
 
 func TestMain(m *testing.M) {
 	if err := healthCheck(attempts); err != nil {
-		log.Fatalf("Integration tests: host %s is not availabe: %v", host, err)
+		log.Fatalf("Integration tests: host %s is not available: %v", host, err)
 	}
 
 	code := m.Run()
@@ -49,7 +49,7 @@ func healthCheck(attempts int) error {
 			return nil
 		}
 
-		log.Printf("Integration tests: url %s is not avaible, attempts left: %d\n", basePath, i+1)
+		log.Printf("Integration tests: url %s is not available, attempts left: %d\n", basePath, i+1)
 
 		time.Sleep(500 * time.Millisecond)
 	}
