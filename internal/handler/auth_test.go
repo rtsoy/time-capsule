@@ -130,7 +130,7 @@ func TestAuthHandler_signUp(t *testing.T) {
 				Password: "Qwerty123",
 			},
 			expectedStatusCode:   http.StatusCreated,
-			expectedResponseBody: `{"id":"000000000000000000000000","username":"username123","email":"foo@example.com","registeredAt":"1970-01-01T06:00:00+06:00"}`,
+			expectedResponseBody: `{"id":"000000000000000000000000","username":"username123","email":"foo@example.com","registeredAt":"1970-01-01T00:00:00Z"}`,
 		},
 		{
 			name:                 "Invalid JSON",

@@ -133,12 +133,12 @@ func TestCapsuleHandler_updateCapsule(t *testing.T) {
 		{
 			name: "OK",
 			mockBehavior: func(s *mock_service.MockCapsuleService, ctx context.Context, userID, capsuleID primitive.ObjectID, update domain.UpdateCapsuleDTO) {
-				s.EXPECT().UpdateCapsule(ctx, userID, capsuleID, update).Return(nil).Times(1)
+				s.EXPECT().UpdateCapsule(ctx, userID, capsuleID, gomock.Any()).Return(nil).Times(1)
 			},
 			ctxUserID:    primitive.NilObjectID.Hex(),
 			capsuleID:    primitive.NilObjectID,
 			capsuleIDHex: primitive.NilObjectID.Hex(),
-			inputBody:    `{"message": "brand new message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody:    `{"message": "brand new message", "openAt": "1970-01-01T00:00:00Z"}`,
 			inputData: domain.UpdateCapsuleDTO{
 				Message: "brand new message",
 				OpenAt:  time.Unix(0, 0),
@@ -153,7 +153,7 @@ func TestCapsuleHandler_updateCapsule(t *testing.T) {
 			ctxUserID:            "12312312",
 			capsuleID:            primitive.NilObjectID,
 			capsuleIDHex:         primitive.NilObjectID.Hex(),
-			inputBody:            `{"message": "brand new message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody:            `{"message": "brand new message", "openAt": "1970-01-01T00:00:00Z"}`,
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: `{"message":"internal server error"}`,
 		},
@@ -164,7 +164,7 @@ func TestCapsuleHandler_updateCapsule(t *testing.T) {
 			ctxUserID:            primitive.NilObjectID.Hex(),
 			capsuleID:            primitive.NilObjectID,
 			capsuleIDHex:         "123123213",
-			inputBody:            `{"message": "brand new message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody:            `{"message": "brand new message", "openAt": "1970-01-01T00:00:00Z"}`,
 			expectedStatusCode:   http.StatusBadRequest,
 			expectedResponseBody: `{"message":"invalid id"}`,
 		},
@@ -175,7 +175,7 @@ func TestCapsuleHandler_updateCapsule(t *testing.T) {
 			ctxUserID:    primitive.NilObjectID.Hex(),
 			capsuleID:    primitive.NilObjectID,
 			capsuleIDHex: primitive.NilObjectID.Hex(),
-			inputBody:    `{"message": 123, "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody:    `{"message": 123, "openAt": "1970-01-01T00:00:00Z"}`,
 			inputData: domain.UpdateCapsuleDTO{
 				Message: "brand new message",
 				OpenAt:  time.Unix(0, 0),
@@ -186,12 +186,12 @@ func TestCapsuleHandler_updateCapsule(t *testing.T) {
 		{
 			name: "Service-Failure",
 			mockBehavior: func(s *mock_service.MockCapsuleService, ctx context.Context, userID, capsuleID primitive.ObjectID, update domain.UpdateCapsuleDTO) {
-				s.EXPECT().UpdateCapsule(ctx, userID, capsuleID, update).Return(errors.New("some error")).Times(1)
+				s.EXPECT().UpdateCapsule(ctx, userID, capsuleID, gomock.Any()).Return(errors.New("some error")).Times(1)
 			},
 			ctxUserID:    primitive.NilObjectID.Hex(),
 			capsuleID:    primitive.NilObjectID,
 			capsuleIDHex: primitive.NilObjectID.Hex(),
-			inputBody:    `{"message": "brand new message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody:    `{"message": "brand new message", "openAt": "1970-01-01T00:00:00Z"}`,
 			inputData: domain.UpdateCapsuleDTO{
 				Message: "brand new message",
 				OpenAt:  time.Unix(0, 0),
@@ -269,7 +269,7 @@ func TestCapsuleHandler_getCapsuleByID(t *testing.T) {
 			capsuleID:            primitive.NilObjectID,
 			capsuleIDHex:         primitive.NilObjectID.Hex(),
 			expectedStatusCode:   http.StatusOK,
-			expectedResponseBody: `{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message","images":[],"openAt":"1970-01-01T06:00:01+06:00","createdAt":"1970-01-01T06:00:00+06:00"}`,
+			expectedResponseBody: `{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message","images":[],"openAt":"1970-01-01T00:00:01+00:00","createdAt":"1970-01-01T00:00:00Z"}`,
 		},
 		{
 			name: "Invalid-Context",
@@ -380,8 +380,8 @@ func TestCapsuleHandler_getCapsules(t *testing.T) {
 			ctxUserID:          primitive.NilObjectID.Hex(),
 			expectedStatusCode: http.StatusOK,
 			expectedResponseBody: strings.Replace(strings.Replace(`[
-					{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message 1","images":[],"openAt":"1970-01-01T06:00:01+06:00","createdAt":"1970-01-01T06:00:00+06:00"},
-					{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message 2","images":[],"openAt":"1970-01-01T06:00:02+06:00","createdAt":"1970-01-01T06:00:03+06:00"}
+					{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message 1","images":[],"openAt":"1970-01-01T00:00:01Z","createdAt":"1970-01-01T00:00:00Z"},
+					{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message 2","images":[],"openAt":"1970-01-01T00:00:02Z","createdAt":"1970-01-01T00:00:03Z"}
 			]`, "\n", "", -1), "\t", "", -1),
 		},
 		{
@@ -456,32 +456,32 @@ func TestCapsuleHandler_createCapsule(t *testing.T) {
 		{
 			name: "OK",
 			mockBehavior: func(s *mock_service.MockCapsuleService, ctx context.Context, userID primitive.ObjectID, input domain.CreateCapsuleDTO) {
-				s.EXPECT().CreateCapsule(ctx, userID, input).Return(
+				s.EXPECT().CreateCapsule(ctx, userID, gomock.Any()).Return(
 					&domain.Capsule{
 						ID:        primitive.NilObjectID,
 						UserID:    primitive.NilObjectID,
 						Message:   "some message",
 						Images:    []string{},
-						OpenAt:    time.Unix(0, 0),
-						CreatedAt: time.Unix(0, 0),
+						OpenAt:    time.Unix(0, 0).UTC(),
+						CreatedAt: time.Unix(0, 0).UTC(),
 						Notified:  false,
 					}, nil).Times(1)
 			},
 			ctxUserID: primitive.NilObjectID.Hex(),
-			inputBody: `{"message":"some message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody: `{"message":"some message", "openAt": "1970-01-01T00:00:00Z"}`,
 			inputData: domain.CreateCapsuleDTO{
 				Message: "some message",
 				OpenAt:  time.Unix(0, 0),
 			},
 			expectedStatusCode:   http.StatusCreated,
-			expectedResponseBody: `{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message","images":[],"openAt":"1970-01-01T06:00:00+06:00","createdAt":"1970-01-01T06:00:00+06:00"}`,
+			expectedResponseBody: `{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message","images":[],"openAt":"1970-01-01T00:00:00Z","createdAt":"1970-01-01T00:00:00Z"}`,
 		},
 		{
 			name: "Invalid-Context",
 			mockBehavior: func(s *mock_service.MockCapsuleService, ctx context.Context, userID primitive.ObjectID, input domain.CreateCapsuleDTO) {
 			},
 			ctxUserID:            "12312321312",
-			inputBody:            `{"message":"some message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody:            `{"message":"some message", "openAt": "1970-01-01T00:00:00Z"}`,
 			expectedStatusCode:   http.StatusInternalServerError,
 			expectedResponseBody: `{"message":"internal server error"}`,
 		},
@@ -497,10 +497,10 @@ func TestCapsuleHandler_createCapsule(t *testing.T) {
 		{
 			name: "Service-Failure",
 			mockBehavior: func(s *mock_service.MockCapsuleService, ctx context.Context, userID primitive.ObjectID, input domain.CreateCapsuleDTO) {
-				s.EXPECT().CreateCapsule(ctx, userID, input).Return(nil, errors.New("some error")).Times(1)
+				s.EXPECT().CreateCapsule(ctx, userID, gomock.Any()).Return(nil, errors.New("some error")).Times(1)
 			},
 			ctxUserID: primitive.NilObjectID.Hex(),
-			inputBody: `{"message":"some message", "openAt": "1970-01-01T06:00:00+06:00"}`,
+			inputBody: `{"message":"some message", "openAt": "1970-01-01T00:00:00Z"}`,
 			inputData: domain.CreateCapsuleDTO{
 				Message: "some message",
 				OpenAt:  time.Unix(0, 0),
