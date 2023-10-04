@@ -6,7 +6,7 @@ lint:
 
 integration-test:
 	@echo "Starting test containers..."
-	@docker-compose -p time-capsule-test -f docker-compose-test.yml up -d > nul
+	@docker-compose --env-file .env.example -p time-capsule-test -f docker-compose-test.yml up -d > nul
 	@echo "Running tests..."
 	@go clean -testcache
 	-@go test -v ./tests/...

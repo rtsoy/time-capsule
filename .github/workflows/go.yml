@@ -32,7 +32,7 @@ jobs:
         run: "go test --short ./internal/..."
 
       - name: create test db container
-        run: "docker-compose -p time-capsule-test -f docker-compose-test.yml up -d"
+        run: "docker-compose --env-file .env.example -p time-capsule-test -f docker-compose-test.yml up -d"
 
       - name: integration tests
         run: "go test -v ./tests/..."
