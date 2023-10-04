@@ -269,7 +269,7 @@ func TestCapsuleHandler_getCapsuleByID(t *testing.T) {
 			capsuleID:            primitive.NilObjectID,
 			capsuleIDHex:         primitive.NilObjectID.Hex(),
 			expectedStatusCode:   http.StatusOK,
-			expectedResponseBody: `{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message","images":[],"openAt":"1970-01-01T00:00:01+00:00","createdAt":"1970-01-01T00:00:00Z"}`,
+			expectedResponseBody: `{"id":"000000000000000000000000","userID":"000000000000000000000000","message":"some message","images":[],"openAt":"1970-01-01T00:00:01Z","createdAt":"1970-01-01T00:00:00Z"}`,
 		},
 		{
 			name: "Invalid-Context",
