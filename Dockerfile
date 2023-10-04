@@ -23,6 +23,7 @@ USER appuser
 WORKDIR /app
 
 COPY --from=builder /app/app .
+COPY --from=builder /app/docs /app/docs
 
 EXPOSE 8080
 
