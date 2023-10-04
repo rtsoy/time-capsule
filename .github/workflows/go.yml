@@ -1,0 +1,41 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: false
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54.2
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: unit tests
+        run: "go test --short ./internal/..."
+
+      - name: create test db container
+        run: "docker-compose -p time-capsule-test -f docker-compose-test.yml up -d"
+
+      - name: integration tests
+        run: "go test -v ./tests/..."
+
+      - name: kill test db container
+        run: "docker-compose -p time-capsule-test -f docker-compose-test.yml rm -fsv"
